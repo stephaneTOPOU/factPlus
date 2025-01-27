@@ -5,12 +5,12 @@
 
         <ul class="navbar-nav theme-brand flex-row  text-center">
             <li class="nav-item theme-logo">
-                <a href="index-2.html">
+                <a href="{{ route('home') }}">
                     <img src="{{ asset('assets/img/logo.svg') }}" class="navbar-logo" alt="logo">
                 </a>
             </li>
             <li class="nav-item theme-text">
-                <a href="index-2.html" class="nav-link"> CORK </a>
+                <a href="{{ route('home') }}" class="nav-link"> FactPlus </a>
             </li>
         </ul>
 
@@ -27,10 +27,7 @@
                 </a>
                 <ul class="collapse submenu recent-submenu mini-recent-submenu list-unstyled show" id="dashboard" data-parent="#accordionExample">
                     <li class="active">
-                        <a href="index-2.html"> Analytics </a>
-                    </li>
-                    <li>
-                        <a href="index2.html"> Sales </a>
+                        <a href="{{ route('home') }}"> Ventes </a>
                     </li>
                 </ul>
             </li>

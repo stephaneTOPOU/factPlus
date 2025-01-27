@@ -14,7 +14,7 @@
                 </form>
             </li>
 
-            <li class="nav-item dropdown language-dropdown">
+            {{-- <li class="nav-item dropdown language-dropdown">
                 <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="language-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img src="{{ asset('assets/img/ca.png') }}" class="flag-width" alt="flag">
                 </a>
@@ -24,7 +24,7 @@
                     <a class="dropdown-item d-flex" href="javascript:void(0);"><img src="{{ asset('assets/img/fr.png') }}" class="flag-width" alt="flag"> <span class="align-self-center">&nbsp;French</span></a>
                     <a class="dropdown-item d-flex" href="javascript:void(0);"><img src="{{ asset('assets/img/ca.png') }}" class="flag-width" alt="flag"> <span class="align-self-center">&nbsp;English</span></a>
                 </div>
-            </li>
+            </li> --}}
 
             <li class="nav-item dropdown message-dropdown">
                 <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="messageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
