@@ -1,6 +1,9 @@
 @include('head.head')
 @include('head.head1')
 @include('head.head2')
+@include('head.head3')
+@include('head.head4')
+@include('head.head5')
 
 @include('navbar.nav')
 
@@ -596,5 +599,6 @@
 
 </div>
 <!-- END MAIN CONTAINER -->
-@include('Footer.footer2')
 @include('Footer.footer')
+@include('Footer.footer2')
+@include('Footer.footer3')

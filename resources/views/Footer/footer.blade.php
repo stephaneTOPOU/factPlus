@@ -1,4 +1,14 @@
-</body>
+<!-- BEGIN GLOBAL MANDATORY SCRIPTS -->
+<script src="{{ asset('assets/js/libs/jquery-3.1.1.min.js') }}"></script>
+<script src="{{ asset('bootstrap/js/popper.min.js') }}"></script>
+<script src="{{ asset('bootstrap/js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+<script src="{{ asset('assets/js/app.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        App.init();
+    });
+</script>
+<script src="assets/js/custom.js"></script>
+<!-- END GLOBAL MANDATORY SCRIPTS -->
 
-<!-- Mirrored from designreset.com/cork/ltr/demo2/ by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 04 Aug 2020 17:25:07 GMT -->
-</html>
