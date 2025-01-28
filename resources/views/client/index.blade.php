@@ -38,8 +38,8 @@
                             <table id="html5-extension" class="table table-hover non-hover" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Position</th>
+                                        <th>Nom</th>
+                                        <th>Prénom</th>
                                         <th>Office</th>
                                         <th>Age</th>
                                         <th>Start date</th>
