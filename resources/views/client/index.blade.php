@@ -2,10 +2,11 @@
 @include('head.head1')
 @include('head.head2')
 
-<!-- BEGIN PAGE LEVEL STYLES -->
-<link rel="stylesheet" type="text/css" href="plugins/table/datatable/datatables.css">
-<link rel="stylesheet" type="text/css" href="plugins/table/datatable/dt-global_style.css">
-<!-- END PAGE LEVEL STYLES -->
+<!-- BEGIN PAGE LEVEL CUSTOM STYLES -->
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/table/datatable/datatables.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/table/datatable/custom_dt_html5.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/table/datatable/dt-global_style.css') }}">
+<!-- END PAGE LEVEL CUSTOM STYLES -->
 
 @include('head.head4')
 @include('head.head5')
