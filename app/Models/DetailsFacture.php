@@ -18,4 +18,15 @@ class DetailsFacture extends Model
         'tva',
 
     ];
+
+    public function facture()
+    {
+        return $this->belongsTo(Factures::class);
+    }
+
+    public function produit()
+    {
+        return $this->belongsTo(Produits::class);
+    }
+
 }

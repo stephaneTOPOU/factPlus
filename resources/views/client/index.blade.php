@@ -34,62 +34,181 @@
 
                 <div class="col-xl-12 col-lg-12 col-sm-12  layout-spacing">
                     <div class="widget-content widget-content-area br-6">
+                        <div class="row">
+                            <div class="col-md-10"></div>
+                            <div class="col-md-2">
+                                <a href="{{ route('client.create') }}" class="btn btn-block btn-success pull-right">
+                                    Ajouter </a>
+                            </div>
+                        </div>
                         <div class="table-responsive mb-4 mt-4">
                             <table id="html5-extension" class="table table-hover non-hover" style="width:100%">
                                 <thead>
                                     <tr>
                                         <th>Nom</th>
                                         <th>Prénom</th>
-                                        <th>Office</th>
-                                        <th>Age</th>
-                                        <th>Start date</th>
-                                        <th>Salary</th>
-                                        <th>Extn.</th>
-                                        <th>Avatar</th>
+                                        <th>Email</th>
+                                        <th>Téléphone</th>
+                                        <th>Adresse</th>
+                                        <th>Type de client</th>
+                                        <th>Date de création</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>Tiger Nixon</td>
-                                        <td>System Architect</td>
-                                        <td>Edinburgh</td>
-                                        <td>61</td>
-                                        <td>2011/04/25</td>
-                                        <td>$320,800</td>
-                                        <td>5421</td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <div class="usr-img-frame mr-2 rounded-circle">
-                                                    <img alt="avatar" class="img-fluid rounded-circle"
-                                                        src="assets/img/boy.png">
+                                    @foreach ($clients as $client)
+                                        <tr>
+                                            <td>{{ $client->nom }}</td>
+                                            <td>{{ $client->prenom }}</td>
+                                            <td>{{ $client->email }}</td>
+                                            <td>{{ $client->telephone }}</td>
+                                            <td>{{ $client->adresse }}</td>
+                                            <td>{{ $client->type_client }}</td>
+                                            <td>{{ $client->date_creation }}</td>
+
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-dark btn-sm">Ouvrir</button>
+                                                    <button type="button"
+                                                        class="btn btn-dark btn-sm dropdown-toggle dropdown-toggle-split"
+                                                        id="dropdownMenuReference1" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false"
+                                                        data-reference="parent">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                            height="24" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round"
+                                                            class="feather feather-chevron-down">
+                                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                                        </svg>
+                                                    </button>
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuReference1">
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('client.edit', $client->id) }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                                class="feather feather-edit">
+                                                                <path
+                                                                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7">
+                                                                </path>
+                                                                <path
+                                                                    d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z">
+                                                                </path>
+                                                            </svg>
+                                                            Modifier</a>
+
+                                                        <a class="dropdown-item" href="#"
+                                                            onclick="deleteData({{ $client->id }})"
+                                                            data-id="{{ $client->id }}"
+                                                            data-target="#default{{ $client->id }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                                class="feather feather-trash-2">
+                                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                                <path
+                                                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                                                </path>
+                                                                <line x1="10" y1="11" x2="10"
+                                                                    y2="17"></line>
+                                                                <line x1="14" y1="11" x2="14"
+                                                                    y2="17"></line>
+                                                            </svg>
+                                                            Supprimer
+                                                        </a>
+
+                                                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                                                        <script>
+                                                            function deleteData(id) {
+
+                                                                let table = $('#html5-extension');
+                                                                let url = "{{ url('client') }}/" + id;
+
+                                                                // table.DataTable({
+                                                                //     ajax: {
+                                                                //         url: url,
+                                                                //         type: "GET",
+                                                                //         dataSrc: ""
+                                                                //     },
+                                                                //     columns: [{
+                                                                //             data: 'id'
+                                                                //         },
+                                                                //         {
+                                                                //             data: 'nom'
+                                                                //         },
+                                                                //         {
+                                                                //             data: 'prenom'
+                                                                //         },
+                                                                //         {
+                                                                //             data: 'email'
+                                                                //         },
+                                                                //         {
+                                                                //             data: 'telephone'
+                                                                //         },
+                                                                //         {
+                                                                //             data: 'adresse'
+                                                                //         },
+                                                                //         {
+                                                                //             data: 'type_client'
+                                                                //         },
+                                                                //         {
+                                                                //             data: 'date_creation'
+                                                                //         },
+                                                                //         {
+                                                                //             data: 'action'
+                                                                //         }
+                                                                //     ]
+                                                                // });
+                                                                Swal.fire({
+                                                                    title: 'Etes-vous sûr?',
+                                                                    text: "Vous ne pourrez pas revenir en arrière!",
+                                                                    icon: 'warning',
+                                                                    showCancelButton: true,
+                                                                    confirmButtonColor: '#3085d6',
+                                                                    cancelButtonColor: '#d33',
+                                                                    confirmButtonText: 'Oui, supprimez!'
+                                                                }).then((result) => {
+                                                                    if (result.isConfirmed) {
+                                                                        let url = "{{ url('client') }}/" + id;
+
+                                                                        $.ajax({
+                                                                            type: 'POST',
+                                                                            url: url,
+                                                                            data: {
+                                                                                _method: 'DELETE',
+                                                                                _token: "{{ csrf_token() }}"
+                                                                            },
+                                                                            success: function(response) {
+                                                                                Swal.fire(
+                                                                                    'Supprimé!',
+                                                                                    response.success,
+                                                                                    'success'
+                                                                                ).then(() => {
+                                                                                    table.DataTable().ajax.reload(null, false);
+                                                                                });
+                                                                            },
+                                                                            error: function(xhr) {
+                                                                                Swal.fire(
+                                                                                    'Erreur!',
+                                                                                    'Une erreur est survenue : ' + xhr.responseText,
+                                                                                    'error'
+                                                                                );
+                                                                            }
+                                                                        });
+
+                                                                    }
+                                                                });
+                                                            }
+                                                        </script>
+
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-dark btn-sm">Open</button>
-                                                <button type="button"
-                                                    class="btn btn-dark btn-sm dropdown-toggle dropdown-toggle-split"
-                                                    id="dropdownMenuReference1" data-toggle="dropdown"
-                                                    aria-haspopup="true" aria-expanded="false" data-reference="parent">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                                        height="24" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round" class="feather feather-chevron-down">
-                                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                                    </svg>
-                                                </button>
-                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuReference1">
-                                                    <a class="dropdown-item" href="#">Action</a>
-                                                    <a class="dropdown-item" href="#">Another action</a>
-                                                    <a class="dropdown-item" href="#">Something else here</a>
-                                                    <div class="dropdown-divider"></div>
-                                                    <a class="dropdown-item" href="#">Separated link</a>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>

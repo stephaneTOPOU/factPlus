@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produits;
+use Exception;
 use Illuminate\Http\Request;
 
 class ProduitController extends Controller
@@ -14,7 +15,8 @@ class ProduitController extends Controller
      */
     public function index()
     {
-        //
+        $produits = Produits::all();
+        return view('produit.index', compact('produits'));
     }
 
     /**
@@ -24,7 +26,7 @@ class ProduitController extends Controller
      */
     public function create()
     {
-        //
+        return view('produit.add');
     }
 
     /**
@@ -35,7 +37,28 @@ class ProduitController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'nom' => 'required|string',
+            'description' => 'required|string',
+            'prix_unitaire' => 'required|string',
+            'quantite_stock' => 'required|string',
+            'categorie' => 'required|string',
+            'date_creation' => 'required|string|date',
+        ]);
+
+        try {
+            $data = new Produits();
+            $data->nom = $request->nom;
+            $data->description = $request->description;
+            $data->prix_unitaire = $request->prix_unitaire;
+            $data->quantite_stock = $request->quantite_stock;
+            $data->categorie = $request->categorie;
+            $data->date_creation = $request->date_creation;
+            $data->save();
+            return redirect()->back()->with('success', 'Produit Ajouté avec succès');
+        } catch (Exception $e) {
+            return redirect()->back()->with('success', $e->getMessage());
+        }
     }
 
     /**
@@ -55,9 +78,10 @@ class ProduitController extends Controller
      * @param  \App\Models\Produits  $produits
      * @return \Illuminate\Http\Response
      */
-    public function edit(Produits $produits)
+    public function edit($produits)
     {
-        //
+        $produit = Produits::find($produits);
+        return view('produit.edit', compact('produit'));
     }
 
     /**
@@ -67,9 +91,30 @@ class ProduitController extends Controller
      * @param  \App\Models\Produits  $produits
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Produits $produits)
+    public function update(Request $request, $produits)
     {
-        //
+        $data = $request->validate([
+            'nom' => 'required|string',
+            'description' => 'required|string',
+            'prix_unitaire' => 'required|string',
+            'quantite_stock' => 'required|string',
+            'categorie' => 'required|string',
+            'date_creation' => 'required|string|date',
+        ]);
+
+        try {
+            $data = Produits::find($produits);
+            $data->nom = $request->nom;
+            $data->description = $request->description;
+            $data->prix_unitaire = $request->prix_unitaire;
+            $data->quantite_stock = $request->quantite_stock;
+            $data->categorie = $request->categorie;
+            $data->date_creation = $request->date_creation;
+            $data->update();
+            return redirect()->back()->with('success', 'Produit mis à jour avec succès');
+        } catch (Exception $e) {
+            return redirect()->back()->with('success', $e->getMessage());
+        }
     }
 
     /**
@@ -78,8 +123,14 @@ class ProduitController extends Controller
      * @param  \App\Models\Produits  $produits
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Produits $produits)
+    public function destroy($produits)
     {
-        //
+        $produit = Produits::find($produits);
+        try {
+            $produit->delete();
+            return response()->json(['success' => 'Produit supprimé avec succès !']);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Une erreur est survenue'], 500);
+        }
     }
 }

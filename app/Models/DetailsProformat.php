@@ -18,4 +18,15 @@ class DetailsProformat extends Model
         'tva',
 
     ];
+
+    public function proformat()
+    {
+        return $this->belongsTo(Proformats::class);
+    }
+
+    public function produit()
+    {
+        return $this->belongsTo(Produits::class);
+    }
+
 }

@@ -21,17 +21,17 @@ class Produits extends Model
 
     ];
 
-    public function detailFacture()
+    public function DetailsFacture()
     {
         return $this->hasMany(DetailsFacture::class, 'facture_id');
     }
 
-    public function detailDevis()
+    public function DetailsDevis()
     {
         return $this->hasMany(DetailsDevis::class, 'devis_id');
     }
 
-    public function detailProformat()
+    public function DetailsProformat()
     {
         return $this->hasMany(DetailsProformat::class, 'proformat_id');
     }

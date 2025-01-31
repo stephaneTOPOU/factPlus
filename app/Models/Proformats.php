@@ -21,14 +21,26 @@ class Proformats extends Model
 
     ];
 
-    public function client()
+    public function Clients()
     {
         return $this->belongsTo(Clients::class);
     }
 
-    public function detailProformat()
+    public function DetailsProformat()
     {
         return $this->hasMany(DetailsProformat::class, 'proformat_id');
+    }
+
+    public static function generateReference()
+    {
+        $prefix = 'FACT';
+        $date = now()->format('Ymd');
+
+        // Compte le nombre de factures créées aujourd'hui
+        $countToday = self::whereDate('created_at', now()->toDateString())->count() + 1;
+
+        // Format avec quatre chiffres pour la séquence
+        return sprintf('%s-%s-%04d', $prefix, $date, $countToday);
     }
 
 }

@@ -16,6 +16,17 @@ class DetailsDevis extends Model
         'prix_unitaire',
         'sous_total',
         'tva',
-        
+
     ];
+
+    public function devis()
+    {
+        return $this->belongsTo(Devis::class);
+    }
+
+    public function produit()
+    {
+        return $this->belongsTo(Produits::class);
+    }
+
 }

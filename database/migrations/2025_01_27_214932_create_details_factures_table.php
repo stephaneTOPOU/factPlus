@@ -17,9 +17,9 @@ class CreateDetailsFacturesTable extends Migration
             $table->id();
             $table->bigInteger('facture_id')->unsigned();
             $table->bigInteger('produit_id')->unsigned();
-            $table->integer('quantite')->nullable(false);
-            $table->decimal('prix_unitaire', 10, 2)->nullable(false);
-            $table->decimal('sous_total', 10, 2)->nullable(false);
+            $table->integer('quantite')->nullable();
+            $table->decimal('prix_unitaire', 10, 2)->nullable();
+            $table->decimal('sous_total', 10, 2)->nullable();
             $table->float('tva')->nullable();
             $table->foreign('facture_id')->references('id')->on('factures')->onDelete('cascade');
             $table->foreign('produit_id')->references('id')->on('produits')->onDelete('cascade');

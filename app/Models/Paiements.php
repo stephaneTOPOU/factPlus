@@ -16,4 +16,10 @@ class Paiements extends Model
         'moyen_paiement',
 
     ];
+
+    public function Factures()
+    {
+        return $this->belongsTo(Factures::class);
+    }
+    
 }

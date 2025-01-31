@@ -2,11 +2,15 @@
 @include('head.head1')
 @include('head.head2')
 
-<!-- BEGIN PAGE LEVEL CUSTOM STYLES -->
-<link rel="stylesheet" type="text/css" href="{{ asset('plugins/table/datatable/datatables.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ asset('plugins/table/datatable/custom_dt_html5.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ asset('plugins/table/datatable/dt-global_style.css') }}">
-<!-- END PAGE LEVEL CUSTOM STYLES -->
+
+<!-- BEGIN THEME GLOBAL STYLES -->
+<link href="{{ asset('assets/css/scrollspyNav.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('plugins/animate/animate.css') }}" rel="stylesheet" type="text/css" />
+<script src="{{ asset('plugins/sweetalerts/promise-polyfill.js') }}"></script>
+<link href="{{ asset('plugins/sweetalerts/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('plugins/sweetalerts/sweetalert.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('assets/css/components/custom-sweetalert.css') }}" rel="stylesheet" type="text/css" />
+<!-- END THEME GLOBAL STYLES -->
 
 @include('head.head4')
 @include('head.head5')
@@ -22,76 +26,121 @@
 
     <!--  BEGIN CONTENT AREA  -->
     <div id="content" class="main-content">
-        <div class="layout-px-spacing">
+        <div class="row layout-top-spacing">
 
-            <div class="page-header">
-                <div class="page-title">
-                    <h3>Exportation Clients</h3>
-                </div>
-            </div>
+            <div class="container">
 
-            <div class="row" id="cancel-row">
+                <div class="row">
 
-                <div class="col-xl-12 col-lg-12 col-sm-12  layout-spacing">
-                    <div class="widget-content widget-content-area br-6">
-                        <div class="table-responsive mb-4 mt-4">
-                            <table id="html5-extension" class="table table-hover non-hover" style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Position</th>
-                                        <th>Office</th>
-                                        <th>Age</th>
-                                        <th>Start date</th>
-                                        <th>Salary</th>
-                                        <th>Extn.</th>
-                                        <th>Avatar</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Tiger Nixon</td>
-                                        <td>System Architect</td>
-                                        <td>Edinburgh</td>
-                                        <td>61</td>
-                                        <td>2011/04/25</td>
-                                        <td>$320,800</td>
-                                        <td>5421</td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <div class="usr-img-frame mr-2 rounded-circle">
-                                                    <img alt="avatar" class="img-fluid rounded-circle"
-                                                        src="assets/img/boy.png">
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-dark btn-sm">Open</button>
-                                                <button type="button"
-                                                    class="btn btn-dark btn-sm dropdown-toggle dropdown-toggle-split"
-                                                    id="dropdownMenuReference1" data-toggle="dropdown"
-                                                    aria-haspopup="true" aria-expanded="false" data-reference="parent">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                                        height="24" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round" class="feather feather-chevron-down">
-                                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                                    </svg>
-                                                </button>
-                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuReference1">
-                                                    <a class="dropdown-item" href="#">Action</a>
-                                                    <a class="dropdown-item" href="#">Another action</a>
-                                                    <a class="dropdown-item" href="#">Something else here</a>
-                                                    <div class="dropdown-divider"></div>
-                                                    <a class="dropdown-item" href="#">Separated link</a>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="col-lg-12 col-12 layout-spacing">
+                        <div class="statbox widget box box-shadow">
+                            <div class="widget-header">
+                                <div class="row">
+                                    <div class="col-xl-12 col-md-12 col-sm-12 col-12">
+                                        <h4>FACTURE</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="widget-content widget-content-area">
+                                <form method="POST" action="{{ route('facture.update',$facture->id) }}"
+                                    enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="form-group row  mb-4">
+                                        <label for="client_id" class="col-sm-2 col-form-label col-form-label-sm">Nom du
+                                            client</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" id="client_id" name="client_id">
+                                                <option value="">Choisir un client</option>
+                                                @foreach ($clients as $client)
+                                                    <option value="{{ $client->id }}" @if ($client->id == $facture->client_id) selected @endif>{{ $client->nom }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="produit_id" class="col-sm-2 col-form-label col-form-label-sm">Nom du
+                                            produit</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" id="produit_id" name="produit_id">
+                                                <option value="">Choisir un produit</option>
+                                                @foreach ($produits as $produit)
+                                                    @foreach ($facture->DetailsFacture as $detail)
+                                                    <option value="{{ $produit->id }}" @if ($produit->id == $detail->produit_id) selected @endif>{{ $produit->nom }}</option>
+                                                    @endforeach
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="quantite"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="quantite" placeholder="Quantité"
+                                                name="quantite" required @foreach ($facture->DetailsFacture as $detail) value="{{ old('quantite') ?? $detail->quantite }}" @endforeach>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="prix_unitaire"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Prix unitaire</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control form-control-sm"
+                                                id="prix_unitaire" placeholder="Prix unitaire"
+                                                name="prix_unitaire" required @foreach ($facture->DetailsFacture as $detail) value="{{ old('prix_unitaire') ?? $detail->prix_unitaire }}" @endforeach>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="tva"
+                                            class="col-sm-2 col-form-label col-form-label-sm">TVA</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="tva" placeholder="TVA"
+                                                name="tva" required @foreach ($facture->DetailsFacture as $detail) value="{{ old('tva') ?? $detail->tva }}" @endforeach>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="date_emission"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Date d'émission</label>
+                                        <div class="col-sm-10">
+                                            <input type="date" class="form-control form-control-sm"
+                                                id="date_emission" placeholder="Date d'émission" name="date_emission"
+                                                required value="{{ old('date_emission') ?? $facture->date_emission }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="date_echeance"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Date d'échéance</label>
+                                        <div class="col-sm-10">
+                                            <input type="date" class="form-control form-control-sm"
+                                                id="date_echeance" placeholder="Date d'échéance" name="date_echeance"
+                                                required value="{{ old('date_echeance') ?? $facture->date_echeance }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="status"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Status</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" id="status" name="status">
+                                                <option value="">Choisir un status</option>
+                                                <option value="en attente" {{ old('status', $facture->status ?? '') == 'en attente' ? 'selected' : '' }}>en attente</option>
+                                                <option value="payée" {{ old('status', $facture->status ?? '') == 'payée' ? 'selected' : '' }}>payée</option>
+                                                <option value="annulée" {{ old('status', $facture->status ?? '') == 'annulée' ? 'selected' : '' }}>annulée</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <input type="submit" name="time" required class="btn btn-primary"
+                                        value="Modifier">
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -99,58 +148,21 @@
             </div>
 
         </div>
+
     </div>
-    <!--  END CONTENT AREA  -->
+</div>
+</div>
+<!--  END CONTENT AREA  -->
 </div>
 <!-- END MAIN CONTAINER -->
 
 
 @include('Footer.footer')
 
-<!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
-<script src="{{ asset('plugins/table/datatable/datatables.js') }}"></script>
-<!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
-<script src="{{ asset('plugins/table/datatable/button-ext/dataTables.buttons.min.js') }}"></script>
-<script src="{{ asset('plugins/table/datatable/button-ext/jszip.min.js') }}"></script>
-<script src="{{ asset('plugins/table/datatable/button-ext/buttons.html5.min.js') }}"></script>
-<script src="{{ asset('plugins/table/datatable/button-ext/buttons.print.min.js') }}"></script>
-<script>
-    $('#html5-extension').DataTable({
-        dom: '<"row"<"col-md-12"<"row"<"col-md-6"B><"col-md-6"f> > ><"col-md-12"rt> <"col-md-12"<"row"<"col-md-5"i><"col-md-7"p>>> >',
-        buttons: {
-            buttons: [{
-                    extend: 'copy',
-                    className: 'btn'
-                },
-                {
-                    extend: 'csv',
-                    className: 'btn'
-                },
-                {
-                    extend: 'excel',
-                    className: 'btn'
-                },
-                {
-                    extend: 'print',
-                    className: 'btn'
-                }
-            ]
-        },
-        "oLanguage": {
-            "oPaginate": {
-                "sPrevious": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>',
-                "sNext": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>'
-            },
-            "sInfo": "Showing page _PAGE_ of _PAGES_",
-            "sSearch": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
-            "sSearchPlaceholder": "Search...",
-            "sLengthMenu": "Results :  _MENU_",
-        },
-        "stripeClasses": [],
-        "lengthMenu": [7, 10, 20, 50],
-        "pageLength": 7
-    });
-</script>
-<!-- END PAGE LEVEL CUSTOM SCRIPTS -->
+<!-- BEGIN THEME GLOBAL STYLE -->
+<script src="{{ asset('assets/js/scrollspyNav.js') }}"></script>
+<script src="{{ asset('plugins/sweetalerts/sweetalert2.min.js') }}"></script>
+<script src="{{ asset('plugins/sweetalerts/custom-sweetalert.js') }}"></script>
+<!-- END THEME GLOBAL STYLE -->
 
 @include('Footer.footer3')
