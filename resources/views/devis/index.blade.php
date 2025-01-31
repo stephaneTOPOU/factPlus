@@ -59,12 +59,12 @@
                                 <tbody>
                                     @foreach ($devis as $devi)
                                         <tr>
-                                            <td>{{ $devi->reference_facture }}</td>
+                                            <td>{{ $devi->reference_devis }}</td>
                                             <td>{{ $devi->client->nom }}</td>
-                                            @foreach ($devi->DetailsFacture as $detail)
+                                            @foreach ($devi->detailDevis as $detail)
                                                 <td>{{ $detail->produit->nom }}</td>
                                                 <td>{{ $detail->quantite }}</td>
-                                                <td>{{ $detail->prix }}</td>
+                                                <td>{{ $detail->prix_unitaire }}</td>
                                             @endforeach
 
                                             <td>{{ $devi->date_emission }}</td>

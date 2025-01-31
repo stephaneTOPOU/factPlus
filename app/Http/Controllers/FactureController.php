@@ -145,9 +145,7 @@ class FactureController extends Controller
             $facture->status = $request->status;
             $facture->update();
 
-            $detailFacture2 = $facture->detailsFacture()->firstOrCreate([
-                'produit_id' => $detailFacture['produit_id']
-            ]);
+            $detailFacture2 = DetailsFacture::where('facture_id', $factures)->first();
 
             $detailFacture2->facture_id = $facture->id;
             $detailFacture2->produit_id = $request->produit_id;

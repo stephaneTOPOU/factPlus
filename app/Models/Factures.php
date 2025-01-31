@@ -46,5 +46,4 @@ class Factures extends Model
         return sprintf('%s-%s-%04d', $prefix, $date, $countToday);
     }
 
-
 }
