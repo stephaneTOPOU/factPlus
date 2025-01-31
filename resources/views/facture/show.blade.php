@@ -280,7 +280,7 @@
                             <div class="inv--thankYou">
                                 <div class="row">
                                     <div class="col-sm-12 col-12">
-                                        <p class="">Thank you for doing Business with us.</p>
+                                        <p class="">Merci de faire affaire avec nous.</p>
                                     </div>
                                 </div>
                             </div>

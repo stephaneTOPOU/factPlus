@@ -33,7 +33,7 @@ class Proformats extends Model
 
     public static function generateReference()
     {
-        $prefix = 'FACT';
+        $prefix = 'PROF';
         $date = now()->format('Ymd');
 
         // Compte le nombre de factures créées aujourd'hui

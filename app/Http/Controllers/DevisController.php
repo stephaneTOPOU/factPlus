@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Clients;
 use App\Models\Devis;
+use App\Models\Produits;
 use Illuminate\Http\Request;
 
 class DevisController extends Controller
@@ -14,7 +16,8 @@ class DevisController extends Controller
      */
     public function index()
     {
-        //
+        $devis = Devis::all();
+        return view('devis.index', compact('devis'));
     }
 
     /**
@@ -24,7 +27,9 @@ class DevisController extends Controller
      */
     public function create()
     {
-        //
+        $clients = Clients::all();
+        $produits = Produits::all();
+        return view('devis.add', compact('clients', 'produits'));
     }
 
     /**

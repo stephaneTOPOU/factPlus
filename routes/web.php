@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaiementController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\ProformatController;
+use App\Http\Controllers\TousLesFactureController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,3 +36,5 @@ Route::resource('/devis', DevisController::class);
 Route::resource('/proformat', ProformatController::class);
 Route::resource('/paiement', PaiementController::class);
 Route::resource('/user', UserController::class);
+
+Route::get('/toutes-les-facture', [TousLesFactureController::class, 'invoice'])->name('invoice');

@@ -33,7 +33,7 @@ class Devis extends Model
 
     public static function generateReference()
     {
-        $prefix = 'FACT';
+        $prefix = 'DEV';
         $date = now()->format('Ymd');
 
         // Compte le nombre de factures créées aujourd'hui

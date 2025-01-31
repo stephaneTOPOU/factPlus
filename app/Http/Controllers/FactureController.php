@@ -168,8 +168,14 @@ class FactureController extends Controller
      * @param  \App\Models\Factures  $factures
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Factures $factures)
+    public function destroy($factures)
     {
-        //
+        try {
+            $facture = Factures::find($factures);
+            $facture->delete();
+            return redirect()->back()->with('success', 'Facture supprimée avec succès');
+        } catch (Exception $e) {
+            return redirect()->back()->with('success', $e->getMessage());
+        }
     }
 }
