@@ -26,7 +26,7 @@
 
             <div class="page-header">
                 <div class="page-title">
-                    <h3>Exportation Clients</h3>
+                    <h3>Exportation Facture</h3>
                 </div>
             </div>
 
@@ -64,7 +64,7 @@
                                             @foreach ($facture->DetailsFacture as $detail)
                                                 <td>{{ $detail->produit->nom }}</td>
                                                 <td>{{ $detail->quantite }}</td>
-                                                <td>{{ $detail->prix }}</td>
+                                                <td>{{ $detail->prix_unitaire }}</td>
                                             @endforeach
 
                                             <td>{{ $facture->date_emission }}</td>

@@ -9,6 +9,7 @@ use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\ProformatController;
 use App\Http\Controllers\TousLesDevisController;
 use App\Http\Controllers\TousLesFactureController;
+use App\Http\Controllers\TousLesProformatController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,3 +41,4 @@ Route::resource('/user', UserController::class);
 
 Route::get('/toutes-les-facture', [TousLesFactureController::class, 'invoice'])->name('invoice');
 Route::get('/tous-les-devis', [TousLesDevisController::class, 'devis'])->name('devis');
+Route::get('/tous-les-proformats', [TousLesProformatController::class, 'proformat'])->name('proformat');

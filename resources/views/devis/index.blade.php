@@ -26,7 +26,7 @@
 
             <div class="page-header">
                 <div class="page-title">
-                    <h3>Exportation Clients</h3>
+                    <h3>Exportation DEvis</h3>
                 </div>
             </div>
 

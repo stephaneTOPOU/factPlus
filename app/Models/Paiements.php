@@ -17,9 +17,9 @@ class Paiements extends Model
 
     ];
 
-    public function Factures()
+    public function facture()
     {
         return $this->belongsTo(Factures::class);
     }
-    
+
 }

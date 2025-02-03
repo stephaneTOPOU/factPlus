@@ -21,12 +21,12 @@ class Proformats extends Model
 
     ];
 
-    public function Clients()
+    public function client()
     {
         return $this->belongsTo(Clients::class);
     }
 
-    public function DetailsProformat()
+    public function detailProformat()
     {
         return $this->hasMany(DetailsProformat::class, 'proformat_id');
     }

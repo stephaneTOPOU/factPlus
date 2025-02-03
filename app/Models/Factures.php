@@ -46,4 +46,11 @@ class Factures extends Model
         return sprintf('%s-%s-%04d', $prefix, $date, $countToday);
     }
 
+    public function calculMontant()
+    {
+        return $this->detailsFacture->sum(function ($detail) {
+            return ($detail->quantite * $detail->prix_unitaire) + $detail->tva;
+        });
+    }
+    
 }

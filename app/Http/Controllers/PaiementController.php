@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Factures;
 use App\Models\Paiements;
+use Exception;
 use Illuminate\Http\Request;
 
 class PaiementController extends Controller
@@ -14,7 +16,8 @@ class PaiementController extends Controller
      */
     public function index()
     {
-        //
+        $paiements = Paiements::all();
+        return view('paiement.index', compact('paiements'));
     }
 
     /**
@@ -24,7 +27,8 @@ class PaiementController extends Controller
      */
     public function create()
     {
-        //
+        $factures = Factures::all();
+        return view('paiement.add', compact('factures'));
     }
 
     /**
@@ -35,7 +39,27 @@ class PaiementController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $paiements = $request->validate([
+            'facture_id' => 'required|integer',
+            'moyen_paiement' => 'required|string',
+            'date_paiement' => 'required|string|date',
+        ]);
+        //dd($paiements);
+
+        try {
+            Paiements::create($paiements);
+
+
+            $staus = Factures::where('id', $request->facture_id)->first();
+            $staus->update([
+                'status' => 'payée',
+            ]);
+            
+
+            return redirect()->back()->with('success', 'PAiement Ajouté avec succès');
+        } catch (Exception $e) {
+            return redirect()->back()->with('success', $e->getMessage());
+        }
     }
 
     /**

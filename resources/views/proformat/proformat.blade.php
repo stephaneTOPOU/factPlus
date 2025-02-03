@@ -41,11 +41,11 @@
                                         <input type="text" class="form-control" placeholder="Search">
                                     </div>
                                     <ul class="nav nav-pills inv-list-container d-block" id="pills-tab" role="tablist">
-                                        @foreach ($devis as $devi)
+                                        @foreach ($proformats as $proformat)
                                             <li class="nav-item">
                                                 <div class="nav-link list-actions"
-                                                    id="{{ $devi->reference_devis }}"
-                                                    data-invoice-id="{{ $devi->reference_devis }}">
+                                                    id="{{ $proformat->reference_proformat }}"
+                                                    data-invoice-id="{{ $proformat->reference_proformat }}">
                                                     <div class="f-m-body">
                                                         <div class="f-head">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="24"
@@ -62,12 +62,12 @@
                                                         </div>
                                                         <div class="f-body">
                                                             <p class="invoice-number">
-                                                                {{ $devi->reference_devis }}</p>
+                                                                {{ $proformat->reference_proformat }}</p>
                                                             <p class="invoice-customer-name"><span>À :</span>
-                                                                {{ $devi->client->nom }}</p>
+                                                                {{ $proformat->client->nom }}</p>
                                                             </p>
                                                             <p class="invoice-generated-date">Date :
-                                                                {{ $devi->date_emission }}</p>
+                                                                {{ $proformat->date_emission }}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -103,8 +103,8 @@
                                 </div>
 
                                 <div id="ct" class="">
-                                    @foreach ($devis as $devi)
-                                        <div class="{{ $devi->reference_devis }}">
+                                    @foreach ($proformats as $proformat)
+                                        <div class="{{ $proformat->reference_proformat }}">
                                             <div class="content-section  animated animatedFadeInUp fadeInUp">
 
                                                 <div class="row inv--head-section">
@@ -137,33 +137,33 @@
                                                     <div
                                                         class="col-sm-5 align-self-center  text-sm-right order-sm-0 order-1">
                                                         <p class="inv-detail-title">De :
-                                                            {{ $devi->client->nom }}</p>
+                                                            {{ $proformat->client->nom }}</p>
                                                     </div>
 
                                                     <div class="col-sm-7 align-self-center">
-                                                        <p class="inv-customer-name">{{ $devi->client->nom }}
+                                                        <p class="inv-customer-name">{{ $proformat->client->nom }}
                                                         </p>
-                                                        <p class="inv-street-addr">{{ $devi->client->adresse }}
+                                                        <p class="inv-street-addr">{{ $proformat->client->adresse }}
                                                         </p>
-                                                        <p class="inv-email-address">{{ $devi->client->email }}
+                                                        <p class="inv-email-address">{{ $proformat->client->email }}
                                                         </p>
                                                     </div>
                                                     <div class="col-sm-5 align-self-center  text-sm-right order-2">
                                                         <p class="inv-list-number"><span class="inv-title">Facture
                                                                 Number
                                                                 : </span> <span
-                                                                class="inv-number">[{{ $devi->reference_devis }}]</span>
+                                                                class="inv-number">[{{ $proformat->reference_proformat }}]</span>
                                                         </p>
                                                         <p class="inv-created-date"><span class="inv-title">Date
                                                                 démission :
                                                             </span> <span
-                                                                class="inv-date">{{ $devi->date_emission }}</span>
+                                                                class="inv-date">{{ $proformat->date_emission }}</span>
                                                         </p>
                                                         <p class="inv-due-date"><span class="inv-title">Date
                                                                 d'échéance :
                                                             </span>
                                                             <span
-                                                                class="inv-date">{{ $devi->date_echeance }}</span>
+                                                                class="inv-date">{{ $proformat->date_echeance }}</span>
                                                         </p>
                                                     </div>
                                                 </div>
@@ -186,9 +186,9 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    @foreach ($devi->detailDevis as $detail)
+                                                                    @foreach ($proformat->detailProformat as $detail)
                                                                         <tr>
-                                                                            <td>{{ $devi->reference_devis }}</td>
+                                                                            <td>{{ $proformat->reference_proformat }}</td>
                                                                             <td>{{ $detail->produit->nom }}</td>
                                                                             <td class="text-right">
                                                                                 {{ $detail->quantite }}</td>
@@ -228,7 +228,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    @foreach ($devi->detailDevis as $detail)
+                                                    @foreach ($proformat->detailProformat as $detail)
                                                         <div class="col-sm-7 col-12 order-sm-1 order-0">
                                                             <div class="inv--total-amounts text-sm-right">
                                                                 <div class="row">
@@ -237,7 +237,7 @@
                                                                     </div>
                                                                     <div class="col-sm-4 col-5">
                                                                         <p class="">
-                                                                            {{ number_format($devi->detailDevis->sum(fn($detail) => $detail->quantite * $detail->prix_unitaire), 2) }}
+                                                                            {{ number_format($proformat->detailProformat->sum(fn($detail) => $detail->quantite * $detail->prix_unitaire), 2) }}
                                                                         </p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-7">
@@ -246,7 +246,7 @@
                                                                     <div class="col-sm-4 col-5">
                                                                         <p class="">
                                                                             {{ number_format(
-                                                                                $devi->detailDevis->sum(fn($detail) => ($detail->quantite * $detail->prix_unitaire * $detail->tva) / 100),
+                                                                                $proformat->detailProformat->sum(fn($detail) => ($detail->quantite * $detail->prix_unitaire * $detail->tva) / 100),
                                                                                 2,
                                                                             ) }}
                                                                         </p>
@@ -265,7 +265,7 @@
                                                                     <div class="col-sm-4 col-5 grand-total-amount">
                                                                         <h4 class="">
                                                                             {{ number_format(
-                                                                                $devi->detailDevis->sum(fn($detail) => $detail->quantite * $detail->prix_unitaire * (1 + $detail->tva / 100)),
+                                                                                $proformat->detailProformat->sum(fn($detail) => $detail->quantite * $detail->prix_unitaire * (1 + $detail->tva / 100)),
                                                                                 2,
                                                                             ) }}
                                                                         </h4>
