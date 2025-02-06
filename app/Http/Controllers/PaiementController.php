@@ -16,7 +16,7 @@ class PaiementController extends Controller
      */
     public function index()
     {
-        $paiements = Paiements::all();
+        $paiements = Paiements::with(['facture'])->get();
         return view('paiement.index', compact('paiements'));
     }
 
@@ -54,7 +54,7 @@ class PaiementController extends Controller
             $staus->update([
                 'status' => 'payée',
             ]);
-            
+
 
             return redirect()->back()->with('success', 'PAiement Ajouté avec succès');
         } catch (Exception $e) {

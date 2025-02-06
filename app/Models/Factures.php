@@ -24,33 +24,35 @@ class Factures extends Model
 
     public function client()
     {
-        return $this->belongsTo(Clients::class);
+        return $this->belongsTo(Clients::class, 'client_id');
     }
 
-
-    public function DetailsFacture()
+    public function detailsFacture()
     {
         return $this->hasMany(DetailsFacture::class, 'facture_id');
     }
-
 
     public static function generateReference()
     {
         $prefix = 'FACT';
         $date = now()->format('Ymd');
 
-        // Compte le nombre de factures créées aujourd'hui
-        $countToday = self::whereDate('created_at', now()->toDateString())->count() + 1;
+        // Récupère la dernière facture pour incrémenter la séquence
+        $lastInvoice = self::orderBy('id', 'desc')->first();
 
-        // Format avec quatre chiffres pour la séquence
-        return sprintf('%s-%s-%04d', $prefix, $date, $countToday);
+        // Détermine le prochain numéro séquentiel
+        $nextSequence = $lastInvoice ? ((int)substr($lastInvoice->reference_facture, -4)) + 1 : 1;
+
+        // Retourne la référence formatée
+        return sprintf('%s-%s-%04d', $prefix, $date, $nextSequence);
     }
+
 
     public function calculMontant()
     {
         return $this->detailsFacture->sum(function ($detail) {
-            return ($detail->quantite * $detail->prix_unitaire) + $detail->tva;
+            $montantHT = $detail->quantite * $detail->prix_unitaire;
+            return $montantHT + ($montantHT * $detail->tva / 100);
         });
     }
-    
 }

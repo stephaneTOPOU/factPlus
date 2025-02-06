@@ -9,6 +9,8 @@ class DetailsFacture extends Model
 {
     use HasFactory;
 
+    protected $table = 'details_factures';
+
     protected $fillable = [
         'facture_id',
         'produit_id',
@@ -21,12 +23,11 @@ class DetailsFacture extends Model
 
     public function facture()
     {
-        return $this->belongsTo(Factures::class);
+        return $this->belongsTo(Factures::class, 'facture_id');
     }
 
     public function produit()
     {
-        return $this->belongsTo(Produits::class);
+        return $this->belongsTo(Produits::class, 'produit_id');
     }
-
 }

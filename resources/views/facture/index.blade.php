@@ -61,7 +61,7 @@
                                         <tr>
                                             <td>{{ $facture->reference_facture }}</td>
                                             <td>{{ $facture->client->nom }}</td>
-                                            @foreach ($facture->DetailsFacture as $detail)
+                                            @foreach ($facture->detailsFacture as $detail)
                                                 <td>{{ $detail->produit->nom }}</td>
                                                 <td>{{ $detail->quantite }}</td>
                                                 <td>{{ $detail->prix_unitaire }}</td>

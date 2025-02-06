@@ -80,7 +80,8 @@ class ProduitController extends Controller
      */
     public function edit($produits)
     {
-        $produit = Produits::find($produits);
+        //$produit = Produits::find($produits);
+        $produit = Produits::with(['detailsFacture', 'detailsDevis', 'detailsProformat'])->find($produits);
         return view('produit.edit', compact('produit'));
     }
 

@@ -15,7 +15,8 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $clients = Clients::all();
+        //$clients = Clients::all();
+        $clients = Clients::with(['facture', 'devis', 'proformat'])->get();
         return view('client.index', compact('clients'));
     }
 
@@ -82,7 +83,8 @@ class ClientController extends Controller
      */
     public function edit($clients)
     {
-        $client = Clients::find($clients);
+        //$client = Clients::find($clients);
+        $client = Clients::with(['facture', 'devis', 'proformat'])->findOrFail($clients);
         return view('client.edit', compact('client'));
     }
 

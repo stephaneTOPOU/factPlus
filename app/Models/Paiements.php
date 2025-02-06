@@ -9,6 +9,8 @@ class Paiements extends Model
 {
     use HasFactory;
 
+    protected $table = 'paiements';
+
     protected $fillable = [
         'facture_id',
         'montant',
@@ -19,7 +21,7 @@ class Paiements extends Model
 
     public function facture()
     {
-        return $this->belongsTo(Factures::class);
+        return $this->belongsTo(Factures::class, 'facture_id');
     }
 
 }

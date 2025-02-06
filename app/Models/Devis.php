@@ -23,7 +23,7 @@ class Devis extends Model
 
     public function client()
     {
-        return $this->belongsTo(Clients::class);
+        return $this->belongsTo(Clients::class, 'client_id');
     }
 
     public function detailDevis()
@@ -36,10 +36,13 @@ class Devis extends Model
         $prefix = 'DEV';
         $date = now()->format('Ymd');
 
-        // Compte le nombre de factures créées aujourd'hui
-        $countToday = self::whereDate('created_at', now()->toDateString())->count() + 1;
+        // Récupère la dernière facture pour incrémenter la séquence
+        $lastInvoice = self::orderBy('id', 'desc')->first();
 
-        // Format avec quatre chiffres pour la séquence
-        return sprintf('%s-%s-%04d', $prefix, $date, $countToday);
+        // Détermine le prochain numéro séquentiel
+        $nextSequence = $lastInvoice ? ((int)substr($lastInvoice->reference_devis, -4)) + 1 : 1;
+
+        // Retourne la référence formatée
+        return sprintf('%s-%s-%04d', $prefix, $date, $nextSequence);
     }
 }

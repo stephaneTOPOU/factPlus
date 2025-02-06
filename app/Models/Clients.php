@@ -29,11 +29,11 @@ class Clients extends Model
 
     public function devis()
     {
-        return $this->hasMany(Devis::class, 'devis_id');
+        return $this->hasMany(Devis::class, 'client_id');
     }
 
     public function proformat()
     {
-        return $this->hasMany(Proformats::class, 'proformat_id');
+        return $this->hasMany(Proformats::class, 'client_id');
     }
 }
