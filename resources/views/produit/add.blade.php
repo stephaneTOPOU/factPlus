@@ -59,6 +59,16 @@
                                 <form method="POST" action="{{ route('produit.store') }}"
                                     enctype="multipart/form-data">
                                     @csrf
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="categorie"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Catégorie</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control form-control-sm" id="categorie"
+                                                placeholder="Catégorie" name="categorie" required>
+                                        </div>
+                                    </div>
+
                                     <div class="form-group row  mb-4">
                                         <label for="nom" class="col-sm-2 col-form-label col-form-label-sm">Nom du
                                             Produit</label>
@@ -73,7 +83,7 @@
                                             class="col-sm-2 col-form-label col-form-label-sm">Description du
                                             produit</label>
                                         <div class="col-sm-10">
-                                            <textarea class="form-control" id="description" rows="5" placeholder="Description du produit" name="description"
+                                            <textarea class="form-control" id="description" rows="8" placeholder="Description du produit" name="description"
                                                 required></textarea>
                                         </div>
                                     </div>
@@ -98,24 +108,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row  mb-4">
-                                        <label for="categorie"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Catégorie</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control form-control-sm" id="categorie"
-                                                placeholder="Catégorie" name="categorie" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row  mb-4">
-                                        <label for="date_creation"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Date de création</label>
-                                        <div class="col-sm-10">
-                                            <input type="date" class="form-control form-control-sm"
-                                                id="date_creation" placeholder="Date de création" name="date_creation"
-                                                required>
-                                        </div>
-                                    </div>
                                     <input type="submit" name="time" required class="btn btn-primary"
                                         value="Ajouter">
                                 </form>

@@ -53,8 +53,6 @@ class FactureController extends Controller
 
         $detailFacture = $request->validate([
             'produit_id' => 'required|integer',
-            'quantite' => 'required|integer',
-            'prix_unitaire' => 'required|numeric',
             'tva' => 'required|numeric',
         ]);
         //dd($detailFacture);
@@ -74,8 +72,6 @@ class FactureController extends Controller
             $detailFacture = new DetailsFacture();
             $detailFacture->facture_id = $facture->id;
             $detailFacture->produit_id = $request->produit_id;
-            $detailFacture->quantite = $request->quantite;
-            $detailFacture->prix_unitaire = $request->prix_unitaire;
             $detailFacture->tva = $request->tva;
             $detailFacture->save();
 
@@ -130,8 +126,6 @@ class FactureController extends Controller
 
         $detailFacture = $request->validate([
             'produit_id' => 'required|integer',
-            'quantite' => 'required|integer',
-            'prix_unitaire' => 'required|numeric',
             'tva' => 'required|numeric',
         ]);
         //dd($detailFacture);
@@ -149,8 +143,6 @@ class FactureController extends Controller
 
             $detailFacture2->facture_id = $facture->id;
             $detailFacture2->produit_id = $request->produit_id;
-            $detailFacture2->quantite = $request->quantite;
-            $detailFacture2->prix_unitaire = $request->prix_unitaire;
             $detailFacture2->tva = $request->tva;
             $detailFacture2->update();
 

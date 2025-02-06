@@ -46,10 +46,10 @@
                                 <thead>
                                     <tr>
                                         <th>Référence Facture</th>
+                                        <th>Entreprise</th>
                                         <th>Client</th>
+                                        <th>Catégorie</th>
                                         <th>Produit</th>
-                                        <th>Quantité</th>
-                                        <th>Prix</th>
                                         <th>Date d'émission</th>
                                         <th>Date d'écheance</th>
                                         <th>status</th>
@@ -60,11 +60,11 @@
                                     @foreach ($factures as $facture)
                                         <tr>
                                             <td>{{ $facture->reference_facture }}</td>
+                                            <td>{{ $facture->client->entreprise }}</td>
                                             <td>{{ $facture->client->nom }}</td>
                                             @foreach ($facture->detailsFacture as $detail)
+                                                <td>{{ $detail->produit->categorie }}</td>
                                                 <td>{{ $detail->produit->nom }}</td>
-                                                <td>{{ $detail->quantite }}</td>
-                                                <td>{{ $detail->prix_unitaire }}</td>
                                             @endforeach
 
                                             <td>{{ $facture->date_emission }}</td>

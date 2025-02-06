@@ -106,11 +106,11 @@ class ClientController extends Controller
             'type_client' => 'required|string',
             'nom' => 'required|string',
             'prenom' => 'required|string',
-            'email' => 'required|string|email|unique:clients',
-            'telephone' => 'required|unique:clients',
+            'email' => 'required|string',
+            'telephone' => 'required|string',
             'adresse' => 'required|string',
 
-        ]);dd($data);
+        ]);//dd($data);
 
         try {
             $data = Clients::find($clients);

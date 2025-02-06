@@ -13,6 +13,7 @@ use App\Http\Controllers\TousLesProformatController;
 use App\Http\Controllers\UserController;
 use App\Models\Clients;
 use App\Models\Factures;
+use App\Models\Produits;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -48,6 +49,14 @@ Route::get('/check-email', [ClientController::class, 'checkEmail'])->name('check
 
 
 
-Route::get('/api/facture/{id}', function ($id) {
-    return response()->json(Factures::findOrFail($id));
+// Route::get('/api/facture/{id}', function ($id) {
+//     return response()->json(Factures::findOrFail($id));
+// });
+
+Route::get('/api/client/{id}', function ($id) {
+    return response()->json(Clients::findOrFail($id));
+});
+
+Route::get('/api/produit/detail/{id}', function ($id) {
+    return response()->json(Produits::findOrFail($id));
 });

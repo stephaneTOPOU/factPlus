@@ -9,7 +9,7 @@ class DetailsProformat extends Model
 {
     use HasFactory;
 
-    protected $table = 'details_proformat';
+    protected $table = 'details_proformats';
 
     protected $fillable = [
         'proformat_id',

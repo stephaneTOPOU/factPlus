@@ -45,11 +45,11 @@
                             <table id="html5-extension" class="table table-hover non-hover" style="width:100%">
                                 <thead>
                                     <tr>
+                                        <th>Categorie</th>
                                         <th>Nom</th>
                                         <th>Description</th>
                                         <th>Prix Unitaire</th>
                                         <th>Quantité Stock</th>
-                                        <th>Categorie</th>
                                         <th>Date création</th>
                                         <th>Action</th>
                                     </tr>
@@ -57,12 +57,12 @@
                                 <tbody>
                                     @foreach ($produits as $produit)
                                         <tr>
+                                            <td>{{ $produit->categorie }}</td>
                                             <td>{{ $produit->nom }}</td>
                                             <td>{{ $produit->description }}</td>
                                             <td>{{ $produit->prix_unitaire }}</td>
                                             <td>{{ $produit->quantite_stock }}</td>
-                                            <td>{{ $produit->categorie }}</td>
-                                            <td>{{ $produit->date_creation }}</td>
+                                            <td>{{ $produit->created_at }}</td>
                                             <td>
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-dark btn-sm">Ouvrir</button>
