@@ -17,8 +17,7 @@ class Produits extends Model
         'prix_unitaire',
         'quantite_stock',
         'categorie',
-        'date_creation',
-
+        
     ];
 
     public function DetailsFacture()

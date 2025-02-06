@@ -18,7 +18,7 @@ class Clients extends Model
         'telephone',
         'adresse',
         'type_client',
-        'date_creation',
+        'entreprise'
 
     ];
 

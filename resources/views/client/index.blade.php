@@ -45,7 +45,8 @@
                             <table id="html5-extension" class="table table-hover non-hover" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>Nom</th>
+                                        <th>Entreprise </th>
+                                        <th>Nom du client</th>
                                         <th>Prénom</th>
                                         <th>Email</th>
                                         <th>Téléphone</th>
@@ -58,13 +59,14 @@
                                 <tbody>
                                     @foreach ($clients as $client)
                                         <tr>
+                                            <td>{{ $client?->entreprise }}</td>
                                             <td>{{ $client->nom }}</td>
                                             <td>{{ $client->prenom }}</td>
                                             <td>{{ $client->email }}</td>
                                             <td>{{ $client->telephone }}</td>
                                             <td>{{ $client->adresse }}</td>
                                             <td>{{ $client->type_client }}</td>
-                                            <td>{{ $client->date_creation }}</td>
+                                            <td>{{ $client->created_at }}</td>
 
                                             <td>
                                                 <div class="btn-group">

@@ -14,9 +14,6 @@ class DetailsProformat extends Model
     protected $fillable = [
         'proformat_id',
         'produit_id',
-        'quantite',
-        'prix_unitaire',
-        'sous_total',
         'tva',
 
     ];

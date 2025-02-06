@@ -59,6 +59,55 @@
                                 <form method="POST" action="{{ route('client.update',$client->id) }}" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="type_client" class="col-sm-2 col-form-label col-form-label-sm">Type
+                                            de client</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" id="type_client" name="type_client">
+                                                <option value="">Choisir le type</option>
+                                                <option value="Entreprise" {{ old('type_client', $client->type_client ?? '') == 'Entreprise' ? 'selected' : '' }}>Entreprise</option>
+                                                <option value="Particulier" {{ old('type_client', $client->type_client ?? '') == 'Particulier' ? 'selected' : '' }}>Particulier</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4" id="entreprise_field" style="display: none;">
+                                        <label for="entreprise"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Entreprise du
+                                            client</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control form-control-sm" id="entreprise"
+                                                placeholder="Entreprise du client" name="entreprise" required value="{{ old('entreprise') ?? $client->entreprise }}">
+                                        </div>
+                                    </div>
+
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const typeClientSelect = document.getElementById('type_client');
+                                            const entrepriseField = document.getElementById('entreprise_field');
+                                            const entrepriseInput = document.getElementById('entreprise');
+
+                                            // Fonction pour afficher/masquer et gérer la validation
+                                            function toggleEntrepriseField() {
+                                                if (typeClientSelect.value === 'Entreprise') {
+                                                    entrepriseField.style.display = 'flex';
+                                                    entrepriseInput.setAttribute('required', 'required');
+                                                } else {
+                                                    entrepriseField.style.display = 'none';
+                                                    entrepriseInput.removeAttribute('required');
+                                                }
+                                            }
+
+                                            // Initialisation au chargement de la page
+                                            toggleEntrepriseField();
+
+                                            // Gestion du changement de sélection
+                                            typeClientSelect.addEventListener('change', toggleEntrepriseField);
+                                        });
+                                    </script>
+
+
                                     <div class="form-group row  mb-4">
                                         <label for="nom"
                                             class="col-sm-2 col-form-label col-form-label-sm">Nom</label>
@@ -101,24 +150,6 @@
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control form-control-sm" id="adresse"
                                                 placeholder="Adresse" name="adresse" required value="{{ old('adresse') ?? $client->adresse }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row  mb-4">
-                                        <label for="type_client" class="col-sm-2 col-form-label col-form-label-sm">Type
-                                            de client</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control form-control-sm" id="type_client"
-                                                placeholder="Type de client" name="type_client" required value="{{ old('type_client') ?? $client->type_client }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row  mb-4">
-                                        <label for="date_creation"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Date de création</label>
-                                        <div class="col-sm-10">
-                                            <input type="date" class="form-control form-control-sm"
-                                                id="date_creation" placeholder="Date de création" name="date_creation" required value="{{ old('date_creation') ?? $client->date_creation }}">
                                         </div>
                                     </div>
                                     <input type="submit" name="time" required class="btn btn-primary"

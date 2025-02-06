@@ -13,7 +13,6 @@ class Paiements extends Model
 
     protected $fillable = [
         'facture_id',
-        'montant',
         'date_paiement',
         'moyen_paiement',
 

@@ -17,10 +17,9 @@ class CreateProduitsTable extends Migration
             $table->id();
             $table->string('nom');
             $table->longText('description')->nullable();
-            $table->decimal('prix_unitaire', 10, 2)->nullable(false);
-            $table->integer('quantite_stock')->nullable(false);
+            $table->decimal('prix_unitaire', 10, 2)->nullable();
+            $table->integer('quantite_stock')->nullable();
             $table->string('categorie')->nullable();
-            $table->date('date_creation')->nullable();
             $table->timestamps();
         });
     }

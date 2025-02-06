@@ -16,7 +16,6 @@ class Proformats extends Model
         'reference_proformat',
         'date_emission',
         'date_echeance',
-        'total',
         'status',
 
     ];

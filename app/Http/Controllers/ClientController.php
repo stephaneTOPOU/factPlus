@@ -39,24 +39,30 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'type_client' => 'required|string',
             'nom' => 'required|string',
             'prenom' => 'required|string',
             'email' => 'required|string|email|unique:clients',
             'telephone' => 'required|unique:clients',
             'adresse' => 'required|string',
-            'type_client' => 'required|string',
-            'date_creation' => 'required|string|date',
+
         ]);
 
         try {
             $data = new Clients();
+
+            $data->type_client = $request->type_client;
+
+            if ($request->entreprise) {
+                $data->entreprise = $request->entreprise;
+            }
+
             $data->nom = $request->nom;
             $data->prenom = $request->prenom;
             $data->email = $request->email;
             $data->telephone = $request->telephone;
             $data->adresse = $request->adresse;
-            $data->type_client = $request->type_client;
-            $data->date_creation = $request->date_creation;
+
             $data->save();
             return redirect()->back()->with('success', 'Client Ajouté avec succès');
         } catch (Exception $e) {
@@ -83,7 +89,6 @@ class ClientController extends Controller
      */
     public function edit($clients)
     {
-        //$client = Clients::find($clients);
         $client = Clients::with(['facture', 'devis', 'proformat'])->findOrFail($clients);
         return view('client.edit', compact('client'));
     }
@@ -98,25 +103,30 @@ class ClientController extends Controller
     public function update(Request $request, $clients)
     {
         $data = $request->validate([
+            'type_client' => 'required|string',
             'nom' => 'required|string',
             'prenom' => 'required|string',
             'email' => 'required|string|email|unique:clients',
             'telephone' => 'required|unique:clients',
             'adresse' => 'required|string',
-            'type_client' => 'required|string',
-            'date_creation' => 'required|string|date',
-        ]);
+
+        ]);dd($data);
 
         try {
             $data = Clients::find($clients);
+
+            $data->type_client = $request->type_client;
+
+            if ($request->entreprise) {
+                $data->entreprise = $request->entreprise;
+            }
 
             $data->nom = $request->nom;
             $data->prenom = $request->prenom;
             $data->email = $request->email;
             $data->telephone = $request->telephone;
             $data->adresse = $request->adresse;
-            $data->type_client = $request->type_client;
-            $data->date_creation = $request->date_creation;
+
             $data->update();
             return redirect()->back()->with('success', 'Client a été mis à jour avec succès');
         } catch (Exception $e) {
@@ -139,5 +149,13 @@ class ClientController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Une erreur est survenue'], 500);
         }
+    }
+
+    public function checkEmail(Request $request)
+    {
+        $email = $request->query('email');
+        $exists = Clients::where('email', $email)->exists();
+
+        return response()->json(['exists' => $exists]);
     }
 }

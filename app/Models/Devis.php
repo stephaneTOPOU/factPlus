@@ -16,7 +16,6 @@ class Devis extends Model
         'reference_devis',
         'date_emission',
         'date_echeance',
-        'total',
         'status',
 
     ];

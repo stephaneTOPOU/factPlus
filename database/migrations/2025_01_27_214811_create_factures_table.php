@@ -19,7 +19,6 @@ class CreateFacturesTable extends Migration
             $table->string('reference_facture')->nullable();
             $table->date('date_emission')->nullable();
             $table->date('date_echeance')->nullable();
-            $table->decimal('total', 10, 2)->nullable();
             $table->enum('status',['en attente','payée','annulée'])->default('en attente');
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->timestamps();

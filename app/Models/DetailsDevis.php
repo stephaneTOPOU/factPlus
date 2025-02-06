@@ -14,9 +14,6 @@ class DetailsDevis extends Model
     protected $fillable = [
         'devis_id',
         'produit_id',
-        'quantite',
-        'prix_unitaire',
-        'sous_total',
         'tva',
 
     ];

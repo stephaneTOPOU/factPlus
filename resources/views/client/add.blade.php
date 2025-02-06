@@ -45,6 +45,44 @@
                                 <form method="POST" action="{{ route('client.store') }}" enctype="multipart/form-data">
                                     @csrf
                                     <div class="form-group row  mb-4">
+                                        <label for="type_client" class="col-sm-2 col-form-label col-form-label-sm">Type
+                                            de client</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" id="type_client" name="type_client">
+                                                <option value="">Choisir le type</option>
+                                                <option value="Entreprise">Entreprise</option>
+                                                <option value="Particulier">Particulier</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4" id="entreprise_field" style="display: none;">
+                                        <label for="entreprise"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Entreprise du
+                                            client</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control form-control-sm" id="entreprise"
+                                                placeholder="Entreprise du client" name="entreprise" required>
+                                        </div>
+                                    </div>
+
+                                    <script>
+                                        document.getElementById('type_client').addEventListener('change', function () {
+                                            const entrepriseField = document.getElementById('entreprise_field');
+                                            const entrepriseInput = document.getElementById('entreprise');
+
+                                            if (this.value === 'Entreprise') {
+                                                entrepriseField.style.display = 'flex';
+                                                entrepriseInput.setAttribute('required', 'required'); // Activer la validation
+                                            } else {
+                                                entrepriseField.style.display = 'none';
+                                                entrepriseInput.removeAttribute('required'); // Désactiver la validation
+                                            }
+                                        });
+                                    </script>
+
+
+                                    <div class="form-group row  mb-4">
                                         <label for="nom"
                                             class="col-sm-2 col-form-label col-form-label-sm">Nom</label>
                                         <div class="col-sm-10">
@@ -69,6 +107,25 @@
                                             <input type="email" class="form-control form-control-sm" id="email"
                                                 placeholder="Email" name="email" required>
                                         </div>
+                                        {{-- <script>
+                                            document.getElementById('email').addEventListener('blur', function () {
+                                                const email = this.value;
+                                                const errorMessage = document.getElementById('error-message');
+
+                                                if (email.trim() !== '') {
+                                                    fetch(`/check-email?email=${encodeURIComponent(email)}`)
+                                                        .then(response => response.json())
+                                                        .then(data => {
+                                                            if (data.exists) {
+                                                                errorMessage.textContent = 'Cet e-mail est déjà utilisé.';
+                                                            } else {
+                                                                errorMessage.textContent = '';
+                                                            }
+                                                        })
+                                                        .catch(error => console.error('Erreur:', error));
+                                                }
+                                            });
+                                        </script> --}}
                                     </div>
 
                                     <div class="form-group row  mb-4">
@@ -89,24 +146,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row  mb-4">
-                                        <label for="type_client" class="col-sm-2 col-form-label col-form-label-sm">Type
-                                            de client</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control form-control-sm" id="type_client"
-                                                placeholder="Type de client" name="type_client" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row  mb-4">
-                                        <label for="date_creation"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Date de création</label>
-                                        <div class="col-sm-10">
-                                            <input type="date" class="form-control form-control-sm"
-                                                id="date_creation" placeholder="Date de création" name="date_creation"
-                                                required>
-                                        </div>
-                                    </div>
                                     <input type="submit" name="time" required class="btn btn-primary"
                                         value="Ajouter">
                                 </form>

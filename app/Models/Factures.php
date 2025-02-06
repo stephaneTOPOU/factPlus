@@ -16,7 +16,6 @@ class Factures extends Model
         'reference_facture',
         'date_emission',
         'date_echeance',
-        'total',
         'status',
 
     ];

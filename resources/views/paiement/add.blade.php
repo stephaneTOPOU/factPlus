@@ -58,6 +58,16 @@
                                                 @endforeach
                                             </select>
                                         </div>
+
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
+                                        <label for="status"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Référencement</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control form-control-sm" id="status"
+                                                placeholder="Référencement" name="status" required readonly>
+                                        </div>
                                     </div>
 
                                     <div class="form-group row  mb-4">
@@ -103,6 +113,33 @@
 
 
 @include('Footer.footer')
+
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // Listen for product selection
+    document.getElementById('facture_id').addEventListener('change', function() {
+        const factureID = this.value;
+
+        if (factureID) {
+            // Fetch product details using Axios
+            axios.get(`/api/facture/${factureID}`)
+                .then(response => {
+                    const facture = response.data;
+                    // document.getElementById('reference_facture').value = facture.reference_facture ?? 'N/A';
+                    document.getElementById('status').value = facture.status ?? 'N/A';
+                })
+                .catch(error => {
+                    console.error('Error fetching product data:', error);
+                    alert('Impossible de récupérer les informations de la facturation.');
+                });
+        } else {
+            // Clear the input fields if no product is selected
+            // document.getElementById('reference_facture').value = '';
+            document.getElementById('status').value = '';
+        }
+    });
+</script>
 
 <!-- BEGIN THEME GLOBAL STYLE -->
 <script src="{{ asset('assets/js/scrollspyNav.js') }}"></script>
