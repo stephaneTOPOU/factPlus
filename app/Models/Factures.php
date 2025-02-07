@@ -47,10 +47,25 @@ class Factures extends Model
     }
 
 
-    public function calculMontant()
+    public function montantHT()
     {
         return $this->detailsFacture->sum(function ($detail) {
-            $montantHT = $detail->quantite * $detail->prix_unitaire;
+            return $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
+        });
+    }
+
+    public function tva()
+    {
+        return $this->detailsFacture->sum(function ($detail) {
+            $montantHT = $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
+            return ($montantHT * $detail->tva) / 100;
+        });
+    }
+
+    public function total()
+    {
+        return $this->detailsFacture->sum(function ($detail) {
+            $montantHT = $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
             return $montantHT + ($montantHT * $detail->tva / 100);
         });
     }

@@ -44,4 +44,27 @@ class Proformats extends Model
         // Retourne la référence formatée
         return sprintf('%s-%s-%04d', $prefix, $date, $nextSequence);
     }
+
+    public function montantHT()
+    {
+        return $this->detailProformat->sum(function ($detail) {
+            return $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
+        });
+    }
+
+    public function tva()
+    {
+        return $this->detailProformat->sum(function ($detail) {
+            $montantHT = $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
+            return ($montantHT * $detail->tva) / 100;
+        });
+    }
+
+    public function total()
+    {
+        return $this->detailProformat->sum(function ($detail) {
+            $montantHT = $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
+            return $montantHT + ($montantHT * $detail->tva / 100);
+        });
+    }
 }

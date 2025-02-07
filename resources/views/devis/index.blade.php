@@ -26,7 +26,7 @@
 
             <div class="page-header">
                 <div class="page-title">
-                    <h3>Exportation DEvis</h3>
+                    <h3>Exportation Devis</h3>
                 </div>
             </div>
 
@@ -46,10 +46,10 @@
                                 <thead>
                                     <tr>
                                         <th>Référence Devis</th>
+                                        <th>Entreprise</th>
                                         <th>Client</th>
+                                        <th>Catégorie</th>
                                         <th>Produit</th>
-                                        <th>Quantité</th>
-                                        <th>Prix</th>
                                         <th>Date d'émission</th>
                                         <th>Date d'écheance</th>
                                         <th>status</th>
@@ -60,11 +60,11 @@
                                     @foreach ($devis as $devi)
                                         <tr>
                                             <td>{{ $devi->reference_devis }}</td>
+                                            <td>{{ $devi->client->entreprise }}</td>
                                             <td>{{ $devi->client->nom }}</td>
                                             @foreach ($devi->detailDevis as $detail)
+                                                <td>{{ $detail->produit->categorie }}</td>
                                                 <td>{{ $detail->produit->nom }}</td>
-                                                <td>{{ $detail->quantite }}</td>
-                                                <td>{{ $detail->prix_unitaire }}</td>
                                             @endforeach
 
                                             <td>{{ $devi->date_emission }}</td>

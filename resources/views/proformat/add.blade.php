@@ -58,6 +58,44 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group row  mb-4" id="ty_field" style="display: none;">
+                                        <label for="type_client" class="col-sm-2 col-form-label col-form-label-sm">Type
+                                            de client</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control form-control-sm" id="type_client"
+                                                placeholder="Type de client" name="type_client" required readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4" id="entreprise_field" style="display: none;">
+                                        <label for="entreprise"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Entreprise du
+                                            client</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control form-control-sm" id="entreprise"
+                                                placeholder="Entreprise du client" name="entreprise" required readonly>
+                                        </div>
+                                    </div>
+
+                                    <script>
+                                        document.getElementById('client_id').addEventListener('change', function() {
+                                            const entrepriseField = document.getElementById('entreprise_field');
+                                            const entrepriseInput = document.getElementById('entreprise');
+
+                                            const tyField = document.getElementById('ty_field');
+                                            const tySelect = document.getElementById('type_client');
+
+                                            const isClientSelected = this.value.trim() !== '';
+
+                                            // Gestion de l'affichage et de la validation
+                                            entrepriseField.style.display = isClientSelected ? 'flex' : 'none';
+                                            entrepriseInput.toggleAttribute('required', isClientSelected);
+
+                                            tyField.style.display = isClientSelected ? 'flex' : 'none';
+                                            tySelect.toggleAttribute('required', isClientSelected);
+                                        });
+                                    </script>
+
                                     <div class="form-group row  mb-4">
                                         <label for="produit_id" class="col-sm-2 col-form-label col-form-label-sm">Nom du
                                             produit</label>
@@ -71,25 +109,66 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row  mb-4">
-                                        <label for="quantite"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
+                                    <div class="form-group row  mb-4" id="kt_field" style="display: none;">
+                                        <label for="categorie"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Catégorie</label>
                                         <div class="col-sm-10">
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="quantite" placeholder="Quantité"
-                                                name="quantite" required>
+                                            <input type="text" class="form-control form-control-sm" id="categorie"
+                                                placeholder="Catégorie" name="categorie" required readonly>
                                         </div>
                                     </div>
 
-                                    <div class="form-group row  mb-4">
+                                    <div class="form-group row  mb-4" id="qte_field" style="display: none;">
+                                        <label for="quantite_stock"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="quantite_stock" placeholder="Quantité" name="quantite_stock"
+                                                required readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4" id="pu_field" style="display: none;">
                                         <label for="prix_unitaire"
                                             class="col-sm-2 col-form-label col-form-label-sm">Prix unitaire</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control form-control-sm"
-                                                id="prix_unitaire" placeholder="Prix unitaire"
-                                                name="prix_unitaire" required>
+                                                id="prix_unitaire" placeholder="Prix unitaire" name="prix_unitaire"
+                                                required readonly>
                                         </div>
                                     </div>
+
+                                    <script>
+                                        document.getElementById('produit_id').addEventListener('change', function() {
+                                            const fields = [{
+                                                    field: 'kt_field',
+                                                    input: 'categorie'
+                                                },
+                                                {
+                                                    field: 'qte_field',
+                                                    input: 'quantite_stock'
+                                                },
+                                                {
+                                                    field: 'pu_field',
+                                                    input: 'prix_unitaire'
+                                                }
+                                            ];
+
+                                            const isProduitSelected = this.value.trim() !== '';
+
+                                            fields.forEach(({
+                                                field,
+                                                input
+                                            }) => {
+                                                const fieldElement = document.getElementById(field);
+                                                const inputElement = document.getElementById(input);
+
+                                                // Afficher ou masquer les champs et activer/désactiver la validation
+                                                fieldElement.style.display = isProduitSelected ? 'flex' : 'none';
+                                                inputElement.toggleAttribute('required', isProduitSelected);
+                                            });
+                                        });
+                                    </script>
 
                                     <div class="form-group row  mb-4">
                                         <label for="tva"
@@ -109,6 +188,24 @@
                                                 id="date_emission" placeholder="Date d'émission" name="date_emission"
                                                 required>
                                         </div>
+
+                                        <script>
+                                            // Obtenez la date actuelle
+                                            const today = new Date();
+                                            const yyyy = today.getFullYear();
+                                            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Mois (0-indexé)
+                                            const dd = String(today.getDate()).padStart(2, '0'); // Jour
+
+                                            const todayFormatted = `${yyyy}-${mm}-${dd}`;
+
+                                            // Forcer la date minimum dans l'input date
+                                            const dateInput = document.getElementById('date_emission');
+                                            dateInput.setAttribute('min', todayFormatted);
+
+                                            // Optionnel : définir la valeur par défaut à aujourd'hui
+                                            dateInput.value = todayFormatted;
+                                        </script>
+                                        
                                     </div>
 
                                     <div class="form-group row  mb-4">
@@ -155,6 +252,54 @@
 
 
 @include('Footer.footer')
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    async function fetchData(url, mapping) {
+        try {
+            const response = await axios.get(url);
+            const data = response.data;
+
+            // Map data to inputs
+            for (const [key, value] of Object.entries(mapping)) {
+                document.getElementById(key).value = data[value] ?? 'N/A';
+            }
+        } catch (error) {
+            console.error('Erreur lors de la récupération des données :', error);
+            alert('Impossible de récupérer les informations.');
+        }
+    }
+
+    // Client selection event
+    document.getElementById('client_id').addEventListener('change', function() {
+        const clientID = this.value;
+        if (clientID) {
+            fetchData(`/api/client/${clientID}`, {
+                'type_client': 'type_client',
+                'entreprise': 'entreprise'
+            });
+        } else {
+            document.getElementById('type_client').value = '';
+            document.getElementById('entreprise').value = '';
+        }
+    });
+
+    // Product selection event
+    document.getElementById('produit_id').addEventListener('change', function() { // Correction ici
+        const produitID = this.value;
+        if (produitID) {
+            fetchData(`/api/produit/detail/${produitID}`, {
+                'categorie': 'categorie',
+                'quantite_stock': 'quantite_stock',
+                'prix_unitaire': 'prix_unitaire'
+            });
+        } else {
+            document.getElementById('categorie').value = '';
+            document.getElementById('quantite_stock').value = '';
+            document.getElementById('prix_unitaire').value = '';
+        }
+    });
+</script>
 
 <!-- BEGIN THEME GLOBAL STYLE -->
 <script src="{{ asset('assets/js/scrollspyNav.js') }}"></script>

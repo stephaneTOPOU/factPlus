@@ -78,7 +78,7 @@
                             <div class="invoice-inbox">
 
                                 <div class="inv-not-selected">
-                                    <p>Ouvrez une facture dans la liste.</p>
+                                    <p>Ouvrez une proformat dans la liste.</p>
                                 </div>
 
                                 <div class="invoice-header-section">
@@ -127,16 +127,17 @@
                                             <div class="row inv--detail-section">
 
                                                 <div class="col-sm-7 align-self-center">
-                                                    <p class="inv-to">Facturer à</p>
+                                                    <p class="inv-to">Proformat à</p>
                                                 </div>
                                                 <div
                                                     class="col-sm-5 align-self-center  text-sm-right order-sm-0 order-1">
                                                     <p class="inv-detail-title">De :
-                                                        {{ $proformat->client->nom }}</p>
+                                                        {{ $proformat->client->entreprise }}</p>
                                                 </div>
 
                                                 <div class="col-sm-7 align-self-center">
                                                     <p class="inv-customer-name">{{ $proformat->client->nom }}
+                                                        {{ $proformat->client->prenom }}
                                                     </p>
                                                     <p class="inv-street-addr">{{ $proformat->client->adresse }}
                                                     </p>
@@ -144,7 +145,7 @@
                                                     </p>
                                                 </div>
                                                 <div class="col-sm-5 align-self-center  text-sm-right order-2">
-                                                    <p class="inv-list-number"><span class="inv-title">Facture
+                                                    <p class="inv-list-number"><span class="inv-title">Proformat
                                                             Number
                                                             : </span> <span
                                                             class="inv-number">[{{ $proformat->reference_proformat }}]</span>
@@ -168,7 +169,7 @@
                                                         <table class="table">
                                                             <thead class="">
                                                                 <tr>
-                                                                    <th scope="col">Ref.Devis</th>
+                                                                    <th scope="col">Ref.Prof</th>
                                                                     <th scope="col">Produit</th>
                                                                     <th class="text-right" scope="col">Qte
                                                                     </th>
@@ -185,11 +186,11 @@
                                                                         <td>{{ $proformat->reference_proformat }}</td>
                                                                         <td>{{ $detail->produit->nom }}</td>
                                                                         <td class="text-right">
-                                                                            {{ $detail->quantite }}</td>
+                                                                            {{ $detail->produit->quantite_stock }}</td>
                                                                         <td class="text-right">
-                                                                            {{ $detail->prix_unitaire }}</td>
+                                                                            {{ $detail->produit->prix_unitaire }}</td>
                                                                         <td class="text-right">
-                                                                            {{ number_format($detail->quantite * $detail->prix_unitaire) }}
+                                                                            {{ number_format($proformat->montantHT(), 2, '.', ' ') }}
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
@@ -200,28 +201,29 @@
                                             </div>
 
                                             <div class="row mt-4">
-                                                <div class="col-sm-5 col-12 order-sm-0 order-1">
-                                                    <div class="inv--payment-info">
-                                                        <div class="row">
-                                                            <div class="col-sm-12 col-12">
-                                                                <h6 class=" inv-title">Informations de paiement :</h6>
-                                                            </div>
-                                                            <div class="col-sm-4 col-12">
-                                                                <p class=" inv-subtitle">Nom de la banque : </p>
-                                                            </div>
-                                                            <div class="col-sm-8 col-12">
-                                                                <p class="">Bank of America</p>
-                                                            </div>
-                                                            <div class="col-sm-4 col-12">
-                                                                <p class=" inv-subtitle">Account Number : </p>
-                                                            </div>
-                                                            <div class="col-sm-8 col-12">
-                                                                <p class="">1234567890</p>
+                                                @foreach ($proformat->detailProformat as $detail)
+                                                    <div class="col-sm-5 col-12 order-sm-0 order-1">
+                                                        <div class="inv--payment-info">
+                                                            <div class="row">
+                                                                <div class="col-sm-12 col-12">
+                                                                    <h6 class=" inv-title">Informations du produit :</h6>
+                                                                </div>
+                                                                <div class="col-sm-4 col-12">
+                                                                    <p class=" inv-subtitle">Catégorie : </p>
+                                                                </div>
+                                                                <div class="col-sm-8 col-12">
+                                                                    <p class="">{{ $detail->produit->categorie }}</p>
+                                                                </div>
+                                                                <div class="col-sm-4 col-12">
+                                                                    <p class=" inv-subtitle">Description : </p>
+                                                                </div>
+                                                                <div class="col-sm-8 col-12">
+                                                                    <p class="">{{ $detail->description }}</p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                @foreach ($proformat->detailProformat as $detail)
+
                                                     <div class="col-sm-7 col-12 order-sm-1 order-0">
                                                         <div class="inv--total-amounts text-sm-right">
                                                             <div class="row">
@@ -230,7 +232,7 @@
                                                                 </div>
                                                                 <div class="col-sm-4 col-5">
                                                                     <p class="">
-                                                                        {{ number_format($proformat->detailProformat->sum(fn($detail) => $detail->quantite * $detail->prix_unitaire), 2) }}
+                                                                        {{ number_format($proformat->montantHT(), 2, '.', ' ') }}
                                                                     </p>
                                                                 </div>
                                                                 <div class="col-sm-8 col-7">
@@ -238,10 +240,7 @@
                                                                 </div>
                                                                 <div class="col-sm-4 col-5">
                                                                     <p class="">
-                                                                        {{ number_format(
-                                                                            $proformat->detailProformat->sum(fn($detail) => ($detail->quantite * $detail->prix_unitaire * $detail->tva) / 100),
-                                                                            2,
-                                                                        ) }}
+                                                                        {{ number_format($proformat->tva(), 2, '.', ' ') }}
                                                                     </p>
                                                                 </div>
                                                                 {{-- <div class="col-sm-8 col-7">
@@ -257,10 +256,7 @@
                                                                 </div>
                                                                 <div class="col-sm-4 col-5 grand-total-amount">
                                                                     <h4 class="">
-                                                                        {{ number_format(
-                                                                            $proformat->detailProformat->sum(fn($detail) => $detail->quantite * $detail->prix_unitaire * (1 + $detail->tva / 100)),
-                                                                            2,
-                                                                        ) }}
+                                                                        {{ number_format($proformat->total(), 2, '.', ' ') }}
                                                                     </h4>
                                                                 </div>
                                                             </div>

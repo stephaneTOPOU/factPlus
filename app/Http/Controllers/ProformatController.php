@@ -52,8 +52,6 @@ class ProformatController extends Controller
 
         $detailProformats = $request->validate([
             'produit_id' => 'required|integer',
-            'quantite' => 'required|integer',
-            'prix_unitaire' => 'required|numeric',
             'tva' => 'required|numeric',
         ]);
         //dd($detailProformats);
@@ -68,13 +66,9 @@ class ProformatController extends Controller
             $proformats->status = $request->status;
             $proformats->save();
 
-
-
             $detailProformats = new DetailsProformat();
             $detailProformats->proformat_id = $proformats->id;
             $detailProformats->produit_id = $request->produit_id;
-            $detailProformats->quantite = $request->quantite;
-            $detailProformats->prix_unitaire = $request->prix_unitaire;
             $detailProformats->tva = $request->tva;
             $detailProformats->save();
 
@@ -129,8 +123,6 @@ class ProformatController extends Controller
 
         $detailProformats = $request->validate([
             'produit_id' => 'required|integer',
-            'quantite' => 'required|integer',
-            'prix_unitaire' => 'required|numeric',
             'tva' => 'required|numeric',
         ]);
         //dd($detailProformats);
@@ -148,8 +140,6 @@ class ProformatController extends Controller
 
             $detailProformats->proformat_id = $proformat->id;
             $detailProformats->produit_id = $request->produit_id;
-            $detailProformats->quantite = $request->quantite;
-            $detailProformats->prix_unitaire = $request->prix_unitaire;
             $detailProformats->tva = $request->tva;
             $detailProformats->update();
 

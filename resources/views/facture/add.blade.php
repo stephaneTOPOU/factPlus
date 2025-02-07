@@ -63,7 +63,7 @@
                                             de client</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control form-control-sm" id="type_client"
-                                                placeholder="Entreprise du client" name="type_client" required readonly>
+                                                placeholder="Type de client" name="type_client" required readonly>
                                         </div>
                                     </div>
 
@@ -298,8 +298,6 @@
         }
     });
 </script>
-
-
 
 <!-- BEGIN THEME GLOBAL STYLE -->
 <script src="{{ asset('assets/js/scrollspyNav.js') }}"></script>

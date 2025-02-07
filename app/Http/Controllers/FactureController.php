@@ -139,12 +139,12 @@ class FactureController extends Controller
             $facture->status = $request->status;
             $facture->update();
 
-            $detailFacture2 = DetailsFacture::where('facture_id', $factures)->first();
+            $detailFacture = DetailsFacture::where('facture_id', $factures)->first();
 
-            $detailFacture2->facture_id = $facture->id;
-            $detailFacture2->produit_id = $request->produit_id;
-            $detailFacture2->tva = $request->tva;
-            $detailFacture2->update();
+            $detailFacture->facture_id = $facture->id;
+            $detailFacture->produit_id = $request->produit_id;
+            $detailFacture->tva = $request->tva;
+            $detailFacture->update();
 
             return redirect()->back()->with('success', 'Facture mise à jour avec succès');
         } catch (Exception $e) {

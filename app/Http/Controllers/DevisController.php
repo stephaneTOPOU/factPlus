@@ -52,8 +52,6 @@ class DevisController extends Controller
 
         $detailDevis = $request->validate([
             'produit_id' => 'required|integer',
-            'quantite' => 'required|integer',
-            'prix_unitaire' => 'required|numeric',
             'tva' => 'required|numeric',
         ]);
         //dd($detailDevis);
@@ -68,17 +66,13 @@ class DevisController extends Controller
             $devis->status = $request->status;
             $devis->save();
 
-
-
             $detailDevis = new DetailsDevis();
             $detailDevis->devis_id = $devis->id;
             $detailDevis->produit_id = $request->produit_id;
-            $detailDevis->quantite = $request->quantite;
-            $detailDevis->prix_unitaire = $request->prix_unitaire;
             $detailDevis->tva = $request->tva;
             $detailDevis->save();
 
-            return redirect()->back()->with('success', 'Facture Ajoutée avec succès');
+            return redirect()->back()->with('success', 'Devis Ajoutée avec succès');
         } catch (Exception $e) {
             return redirect()->back()->with('success', $e->getMessage());
         }
@@ -129,8 +123,6 @@ class DevisController extends Controller
 
         $detail = $request->validate([
             'produit_id' => 'required|integer',
-            'quantite' => 'required|integer',
-            'prix_unitaire' => 'required|numeric',
             'tva' => 'required|numeric',
         ]);
         //dd($detail);
@@ -144,16 +136,14 @@ class DevisController extends Controller
             $devi->status = $request->status;
             $devi->update();
 
-            $detail2 = DetailsDevis::where('devis_id', $devi->id)->first();
+            $detail = DetailsDevis::where('devis_id', $devi->id)->first();
 
-            $detail2->devis_id = $devi->id;
-            $detail2->produit_id = $request->produit_id;
-            $detail2->quantite = $request->quantite;
-            $detail2->prix_unitaire = $request->prix_unitaire;
-            $detail2->tva = $request->tva;
-            $detail2->update();
+            $detail->devis_id = $devi->id;
+            $detail->produit_id = $request->produit_id;
+            $detail->tva = $request->tva;
+            $detail->update();
 
-            return redirect()->back()->with('success', 'Facture mise à jour avec succès');
+            return redirect()->back()->with('success', 'Devis mise à jour avec succès');
         } catch (Exception $e) {
             return redirect()->back()->with('success', $e->getMessage());
         }
@@ -169,6 +159,6 @@ class DevisController extends Controller
     {
         $devis = Devis::find($devis);
         $devis->delete();
-        return redirect()->back()->with('success', 'Facture supprimée avec succès');
+        return redirect()->back()->with('success', 'Devis supprimée avec succès');
     }
 }

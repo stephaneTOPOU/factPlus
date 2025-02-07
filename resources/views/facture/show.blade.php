@@ -132,11 +132,12 @@
                                                 <div
                                                     class="col-sm-5 align-self-center  text-sm-right order-sm-0 order-1">
                                                     <p class="inv-detail-title">De :
-                                                        {{ $facture->client->nom }}</p>
+                                                        {{ $facture->client->entreprise }}</p>
                                                 </div>
 
                                                 <div class="col-sm-7 align-self-center">
                                                     <p class="inv-customer-name">{{ $facture->client->nom }}
+                                                        {{ $facture->client->prenom }}
                                                     </p>
                                                     <p class="inv-street-addr">{{ $facture->client->adresse }}
                                                     </p>
@@ -180,16 +181,16 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                @foreach ($facture->DetailsFacture as $detail)
+                                                                @foreach ($facture->detailsFacture as $detail)
                                                                     <tr>
                                                                         <td>{{ $facture->reference_facture }}</td>
                                                                         <td>{{ $detail->produit->nom }}</td>
                                                                         <td class="text-right">
-                                                                            {{ $detail->quantite }}</td>
+                                                                            {{ $detail->produit->quantite_stock }}</td>
                                                                         <td class="text-right">
-                                                                            {{ $detail->prix_unitaire }}</td>
+                                                                            {{ $detail->produit->prix_unitaire }}</td>
                                                                         <td class="text-right">
-                                                                            {{ number_format($detail->quantite * $detail->prix_unitaire) }}
+                                                                            {{ number_format($facture->montantHT(), 2, '.', ' ') }}
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
@@ -198,30 +199,31 @@
                                                     </div>
                                                 </div>
                                             </div>
-
+                                            
                                             <div class="row mt-4">
-                                                <div class="col-sm-5 col-12 order-sm-0 order-1">
-                                                    <div class="inv--payment-info">
-                                                        <div class="row">
-                                                            <div class="col-sm-12 col-12">
-                                                                <h6 class=" inv-title">Informations de paiement :</h6>
-                                                            </div>
-                                                            <div class="col-sm-4 col-12">
-                                                                <p class=" inv-subtitle">Nom de la banque : </p>
-                                                            </div>
-                                                            <div class="col-sm-8 col-12">
-                                                                <p class="">Bank of America</p>
-                                                            </div>
-                                                            <div class="col-sm-4 col-12">
-                                                                <p class=" inv-subtitle">Account Number : </p>
-                                                            </div>
-                                                            <div class="col-sm-8 col-12">
-                                                                <p class="">1234567890</p>
+                                                @foreach ($facture->detailsFacture as $detail)
+                                                    <div class="col-sm-5 col-12 order-sm-0 order-1">
+                                                        <div class="inv--payment-info">
+                                                            <div class="row">
+                                                                <div class="col-sm-12 col-12">
+                                                                    <h6 class=" inv-title">Informations du produit :</h6>
+                                                                </div>
+                                                                <div class="col-sm-4 col-12">
+                                                                    <p class=" inv-subtitle">Catégorie : </p>
+                                                                </div>
+                                                                <div class="col-sm-8 col-12">
+                                                                    <p class="">{{ $detail->produit->categorie }}</p>
+                                                                </div>
+                                                                <div class="col-sm-4 col-12">
+                                                                    <p class=" inv-subtitle">Description : </p>
+                                                                </div>
+                                                                <div class="col-sm-8 col-12">
+                                                                    <p class="">{{ $detail->description }}</p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                @foreach ($facture->DetailsFacture as $detail)
+
                                                     <div class="col-sm-7 col-12 order-sm-1 order-0">
                                                         <div class="inv--total-amounts text-sm-right">
                                                             <div class="row">
@@ -230,7 +232,7 @@
                                                                 </div>
                                                                 <div class="col-sm-4 col-5">
                                                                     <p class="">
-                                                                        {{ number_format($facture->detailsFacture->sum(fn($detail) => $detail->quantite * $detail->prix_unitaire), 2) }}
+                                                                        {{ number_format($facture->montantHT(), 2, '.', ' ') }}
                                                                     </p>
                                                                 </div>
                                                                 <div class="col-sm-8 col-7">
@@ -238,10 +240,7 @@
                                                                 </div>
                                                                 <div class="col-sm-4 col-5">
                                                                     <p class="">
-                                                                        {{ number_format(
-                                                                            $facture->detailsFacture->sum(fn($detail) => ($detail->quantite * $detail->prix_unitaire * $detail->tva) / 100),
-                                                                            2,
-                                                                        ) }}
+                                                                        {{ number_format($facture->tva(), 2, '.', ' ') }}
                                                                     </p>
                                                                 </div>
                                                                 {{-- <div class="col-sm-8 col-7">
@@ -257,10 +256,7 @@
                                                                 </div>
                                                                 <div class="col-sm-4 col-5 grand-total-amount">
                                                                     <h4 class="">
-                                                                        {{ number_format(
-                                                                            $facture->detailsFacture->sum(fn($detail) => $detail->quantite * $detail->prix_unitaire * (1 + $detail->tva / 100)),
-                                                                            2,
-                                                                        ) }}
+                                                                        {{ number_format($facture->total(), 2, '.', ' ') }}
                                                                     </h4>
                                                                 </div>
                                                             </div>
