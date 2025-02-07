@@ -46,6 +46,8 @@
                                 <thead>
                                     <tr>
                                         <th>Référence Facture</th>
+                                        <th>Client</th>
+                                        <th>Produit</th>
                                         <th>Montant</th>
                                         <th>Date de paiement</th>
                                         <th>Moyen de paiement</th>
@@ -56,7 +58,9 @@
                                     @foreach ($paiements as $paiement)
                                         <tr>
                                             <td>{{ $paiement->facture->reference_facture }}</td>
-                                            <td>{{ number_format($paiement->facture->calculMontant()) }}</td>
+                                            <td>{{ $paiement->facture->client->nom }}</td>
+                                            <td>{{ $paiement->facture->produit->nom }}</td>
+                                            <td>{{ number_format($paiement->facture->total(), 2, '.', ' ') }}</td>
                                             <td>{{ $paiement->date_paiement }}</td>
                                             <td>{{ $paiement->moyen_paiement }}</td>
                                             <td>

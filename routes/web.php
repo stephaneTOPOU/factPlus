@@ -49,9 +49,9 @@ Route::get('/check-email', [ClientController::class, 'checkEmail'])->name('check
 
 
 
-// Route::get('/api/facture/{id}', function ($id) {
-//     return response()->json(Factures::findOrFail($id));
-// });
+Route::get('/api/facture/{id}', function ($id) {
+    return response()->json(Factures::findOrFail($id));
+});
 
 Route::get('/api/client/{id}', function ($id) {
     return response()->json(Clients::findOrFail($id));

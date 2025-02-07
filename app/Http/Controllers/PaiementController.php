@@ -49,7 +49,6 @@ class PaiementController extends Controller
         try {
             Paiements::create($paiements);
 
-
             $staus = Factures::where('id', $request->facture_id)->first();
             $staus->update([
                 'status' => 'payée',

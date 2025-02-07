@@ -61,14 +61,29 @@
 
                                     </div>
 
-                                    <div class="form-group row  mb-4">
+                                    <div class="form-group row  mb-4" id="status_field" style="display: none;">
                                         <label for="status"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Référencement</label>
+                                            class="col-sm-2 col-form-label col-form-label-sm">Status</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control form-control-sm" id="status"
-                                                placeholder="Référencement" name="status" required readonly>
+                                                placeholder="Status" name="status" required readonly>
                                         </div>
                                     </div>
+
+                                    <script>
+                                        document.getElementById('facture_id').addEventListener('change', function () {
+                                            const statusField = document.getElementById('status_field');
+                                            const statusInput = document.getElementById('status');
+
+                                            if (this.value) {
+                                                statusField.style.display = 'flex';
+                                                statusInput.setAttribute('required', 'required'); // Activer la validation
+                                            } else {
+                                                statusField.style.display = 'none';
+                                                statusInput.removeAttribute('required'); // Désactiver la validation
+                                            }
+                                        });
+                                    </script>
 
                                     <div class="form-group row  mb-4">
                                         <label for="moyen_paiement"
@@ -90,6 +105,24 @@
                                                 id="date_paiement" placeholder="Date de paiement" name="date_paiement"
                                                 required>
                                         </div>
+
+                                        <script>
+                                            // Obtenez la date actuelle
+                                            const today = new Date();
+                                            const yyyy = today.getFullYear();
+                                            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Mois (0-indexé)
+                                            const dd = String(today.getDate()).padStart(2, '0'); // Jour
+
+                                            const todayFormatted = `${yyyy}-${mm}-${dd}`;
+
+                                            // Forcer la date minimum dans l'input date
+                                            const dateInput = document.getElementById('date_paiement');
+                                            dateInput.setAttribute('min', todayFormatted);
+
+                                            // Optionnel : définir la valeur par défaut à aujourd'hui
+                                            dateInput.value = todayFormatted;
+                                        </script>
+
                                     </div>
 
                                     <input type="submit" name="time" required class="btn btn-primary"
