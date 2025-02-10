@@ -78,9 +78,11 @@ class PaiementController extends Controller
      * @param  \App\Models\Paiements  $paiements
      * @return \Illuminate\Http\Response
      */
-    public function edit(Paiements $paiements)
+    public function edit($paiements)
     {
-        //
+        $paiement = Paiements::with(['facture'])->find($paiements);
+        $factures = Factures::all();
+        return view('paiement.edit', compact('paiement', 'factures'));
     }
 
     /**
@@ -90,9 +92,29 @@ class PaiementController extends Controller
      * @param  \App\Models\Paiements  $paiements
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Paiements $paiements)
+    public function update(Request $request, $paiements)
     {
-        //
+        $paiement = $request->validate([
+            'facture_id' => 'required|integer',
+            'moyen_paiement' => 'required|string',
+            'date_paiement' => 'required|string|date',
+        ]);
+
+        try {
+            $data = Paiements::findOrFail($paiements); // Récupère le paiement correspondant
+
+            $data->update($paiement);
+
+            $staus = Factures::where('id', $request->facture_id)->first();
+            $staus->update([
+                'status' => 'payée',
+            ]);
+
+
+            return redirect()->back()->with('success', 'PAiement mis à jour avec succès');
+        } catch (Exception $e) {
+            return redirect()->back()->with('success', $e->getMessage());
+        }
     }
 
     /**
@@ -101,8 +123,14 @@ class PaiementController extends Controller
      * @param  \App\Models\Paiements  $paiements
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Paiements $paiements)
+    public function destroy($paiements)
     {
-        //
+        try {
+            $paiement = Paiements::find($paiements);
+            $paiement->delete();
+            return redirect()->back()->with('success', 'Paiement supprimé avec succès');
+        } catch (Exception $e) {
+            return redirect()->back()->with('success', $e->getMessage());
+        }
     }
 }
