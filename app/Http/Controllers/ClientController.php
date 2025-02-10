@@ -15,7 +15,6 @@ class ClientController extends Controller
      */
     public function index()
     {
-        //$clients = Clients::all();
         $clients = Clients::with(['facture', 'devis', 'proformat'])->get();
         return view('client.index', compact('clients'));
     }
@@ -43,7 +42,7 @@ class ClientController extends Controller
             'nom' => 'required|string',
             'prenom' => 'required|string',
             'email' => 'required|string|email|unique:clients',
-            'telephone' => 'required|unique:clients',
+            'telephone' => 'required|regex:/^\+?[0-9]{10,15}$/',
             'adresse' => 'required|string',
 
         ]);
@@ -151,11 +150,4 @@ class ClientController extends Controller
         }
     }
 
-    public function checkEmail(Request $request)
-    {
-        $email = $request->query('email');
-        $exists = Clients::where('email', $email)->exists();
-
-        return response()->json(['exists' => $exists]);
-    }
 }

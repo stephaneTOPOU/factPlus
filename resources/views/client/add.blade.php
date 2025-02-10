@@ -67,7 +67,7 @@
                                     </div>
 
                                     <script>
-                                        document.getElementById('type_client').addEventListener('change', function () {
+                                        document.getElementById('type_client').addEventListener('change', function() {
                                             const entrepriseField = document.getElementById('entreprise_field');
                                             const entrepriseInput = document.getElementById('entreprise');
 
@@ -106,26 +106,51 @@
                                         <div class="col-sm-10">
                                             <input type="email" class="form-control form-control-sm" id="email"
                                                 placeholder="Email" name="email" required>
+                                                <p id="error-message" style="color: red;"></p>
                                         </div>
-                                        {{-- <script>
-                                            document.getElementById('email').addEventListener('blur', function () {
-                                                const email = this.value;
+                                        <script>
+                                            document.getElementById('email').addEventListener('blur', function() {
+                                                const email = this.value.trim();
                                                 const errorMessage = document.getElementById('error-message');
 
-                                                if (email.trim() !== '') {
+                                                // Réinitialiser le message d'erreur
+                                                errorMessage.textContent = '';
+
+                                                // Vérification du format de l'email
+                                                if (!validateEmail(email)) {
+                                                    errorMessage.textContent = 'Veuillez entrer une adresse e-mail valide.';
+                                                    return;
+                                                }
+
+                                                if (email) {
                                                     fetch(`/check-email?email=${encodeURIComponent(email)}`)
-                                                        .then(response => response.json())
+                                                        .then(response => {
+                                                            if (!response.ok) {
+                                                                throw new Error('Erreur serveur');
+                                                            }
+                                                            return response.json();
+                                                        })
                                                         .then(data => {
                                                             if (data.exists) {
                                                                 errorMessage.textContent = 'Cet e-mail est déjà utilisé.';
                                                             } else {
-                                                                errorMessage.textContent = '';
+                                                                errorMessage.textContent = 'E-mail disponible !';
+                                                                errorMessage.style.color = 'green';
                                                             }
                                                         })
-                                                        .catch(error => console.error('Erreur:', error));
+                                                        .catch(error => {
+                                                            console.error('Erreur:', error);
+                                                            errorMessage.textContent = 'Erreur lors de la vérification de l\'e-mail.';
+                                                        });
                                                 }
                                             });
-                                        </script> --}}
+
+                                            // Fonction pour valider le format de l'e-mail
+                                            function validateEmail(email) {
+                                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                                return emailRegex.test(email);
+                                            }
+                                        </script>
                                     </div>
 
                                     <div class="form-group row  mb-4">
@@ -133,8 +158,46 @@
                                             class="col-sm-2 col-form-label col-form-label-sm">Téléphone</label>
                                         <div class="col-sm-10">
                                             <input type="tel" class="form-control form-control-sm" id="telephone"
-                                                placeholder="Téléphone" name="telephone" required>
+                                                placeholder="Téléphone" name="telephone" required
+                                                pattern="^\+?\d{10,15}$"
+                                                title="Veuillez entrer un numéro de téléphone valide (exemple : +228xxxxxxxx)">
                                         </div>
+
+                                        <script>
+                                            document.getElementById('telephone').addEventListener('blur', function() {
+                                                const phoneNumber = this.value.trim();
+                                                const errorMessage = document.getElementById('telephone-error');
+
+                                                // Supprime les anciens messages d'erreur
+                                                if (!errorMessage) {
+                                                    createErrorMessage(this, "Veuillez entrer un numéro valide.");
+                                                }
+
+                                                const phoneRegex = /^\+?\d{10,15}$/;
+                                                if (!phoneRegex.test(phoneNumber)) {
+                                                    setErrorState(this, "Veuillez entrer un numéro de téléphone valide (10 à 15 chiffres).");
+                                                } else {
+                                                    clearErrorState(this);
+                                                }
+                                            });
+
+                                            function createErrorMessage(element, message) {
+                                                const errorEl = document.createElement('p');
+                                                errorEl.id = 'telephone-error';
+                                                errorEl.style.color = 'red';
+                                                element.parentNode.appendChild(errorEl);
+                                            }
+
+                                            function setErrorState(element, message) {
+                                                const errorEl = document.getElementById('telephone-error');
+                                                errorEl.textContent = message;
+                                            }
+
+                                            function clearErrorState(element) {
+                                                const errorEl = document.getElementById('telephone-error');
+                                                errorEl.textContent = '';
+                                            }
+                                        </script>
                                     </div>
 
                                     <div class="form-group row  mb-4">

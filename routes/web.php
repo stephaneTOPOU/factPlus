@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DevisController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaiementController;
@@ -45,7 +46,9 @@ Route::resource('/user', UserController::class);
 Route::get('/toutes-les-facture', [TousLesFactureController::class, 'invoice'])->name('invoice');
 Route::get('/tous-les-devis', [TousLesDevisController::class, 'devis'])->name('devis');
 Route::get('/tous-les-proformats', [TousLesProformatController::class, 'proformat'])->name('proformat');
-Route::get('/check-email', [ClientController::class, 'checkEmail'])->name('check.email');
+
+
+Route::get('/check-email', [EmailController::class, 'checkEmail'])->name('check.email');
 
 
 

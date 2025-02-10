@@ -123,47 +123,12 @@
                                                         </a>
 
                                                         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
                                                         <script>
                                                             function deleteData(id) {
+                                                                const url = "{{ url('client') }}/" + id;
+                                                                const table = $('#html5-extension');
 
-                                                                let table = $('#html5-extension');
-                                                                let url = "{{ url('client') }}/" + id;
-
-                                                                // table.DataTable({
-                                                                //     ajax: {
-                                                                //         url: url,
-                                                                //         type: "GET",
-                                                                //         dataSrc: ""
-                                                                //     },
-                                                                //     columns: [{
-                                                                //             data: 'id'
-                                                                //         },
-                                                                //         {
-                                                                //             data: 'nom'
-                                                                //         },
-                                                                //         {
-                                                                //             data: 'prenom'
-                                                                //         },
-                                                                //         {
-                                                                //             data: 'email'
-                                                                //         },
-                                                                //         {
-                                                                //             data: 'telephone'
-                                                                //         },
-                                                                //         {
-                                                                //             data: 'adresse'
-                                                                //         },
-                                                                //         {
-                                                                //             data: 'type_client'
-                                                                //         },
-                                                                //         {
-                                                                //             data: 'date_creation'
-                                                                //         },
-                                                                //         {
-                                                                //             data: 'action'
-                                                                //         }
-                                                                //     ]
-                                                                // });
                                                                 Swal.fire({
                                                                     title: 'Etes-vous sûr?',
                                                                     text: "Vous ne pourrez pas revenir en arrière!",
@@ -174,13 +139,10 @@
                                                                     confirmButtonText: 'Oui, supprimez!'
                                                                 }).then((result) => {
                                                                     if (result.isConfirmed) {
-                                                                        let url = "{{ url('client') }}/" + id;
-
                                                                         $.ajax({
-                                                                            type: 'POST',
+                                                                            type: 'DELETE',
                                                                             url: url,
                                                                             data: {
-                                                                                _method: 'DELETE',
                                                                                 _token: "{{ csrf_token() }}"
                                                                             },
                                                                             success: function(response) {
@@ -193,18 +155,19 @@
                                                                                 });
                                                                             },
                                                                             error: function(xhr) {
+                                                                                const message = xhr.responseJSON?.message || xhr.responseText;
                                                                                 Swal.fire(
                                                                                     'Erreur!',
-                                                                                    'Une erreur est survenue : ' + xhr.responseText,
+                                                                                    'Une erreur est survenue : ' + message,
                                                                                     'error'
                                                                                 );
                                                                             }
                                                                         });
-
                                                                     }
                                                                 });
                                                             }
                                                         </script>
+
 
                                                     </div>
                                                 </div>
@@ -230,11 +193,13 @@
 
 <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
 <script src="{{ asset('plugins/table/datatable/datatables.js') }}"></script>
+
 <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
 <script src="{{ asset('plugins/table/datatable/button-ext/dataTables.buttons.min.js') }}"></script>
 <script src="{{ asset('plugins/table/datatable/button-ext/jszip.min.js') }}"></script>
 <script src="{{ asset('plugins/table/datatable/button-ext/buttons.html5.min.js') }}"></script>
 <script src="{{ asset('plugins/table/datatable/button-ext/buttons.print.min.js') }}"></script>
+
 <script>
     $('#html5-extension').DataTable({
         dom: '<"row"<"col-md-12"<"row"<"col-md-6"B><"col-md-6"f> > ><"col-md-12"rt> <"col-md-12"<"row"<"col-md-5"i><"col-md-7"p>>> >',
