@@ -56,7 +56,7 @@
                                 @endif
 
 
-                                <form method="POST" action="{{ route('client.update',$client->id) }}" enctype="multipart/form-data">
+                                <form method="POST" action="{{ route('client.update',$client->id) }}" enctype="multipart/form-data" id="client-form">
                                     @csrf
                                     @method('PUT')
 
@@ -174,6 +174,60 @@
 
 
 @include('Footer.footer')
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('client-form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Empêche le rechargement de la page
+
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('input[name="_token"]').value;
+
+        console.log('FormData:', formData);
+        console.log('CSRF Token:', csrfToken);
+        try {
+            const response = await fetch(this.action, {
+                method: this.method,
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    title: 'Succès !',
+                    text: data.message,
+                    type: 'success',
+                    confirmButtonText: 'OK',
+                    padding: '2em'
+                }).then(() => {
+                    window.location.reload(); // Recharge la page ou redirige
+                });
+            } else {
+                Swal.fire({
+                    title: 'Erreur',
+                    text: data.message || 'Une erreur est survenue.',
+                    type: 'error',
+                    confirmButtonText: 'OK',
+                    padding: '2em'
+                });
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Erreur lors de la soumission.',
+                type: 'error',
+                confirmButtonText: 'OK',
+                padding: '2em'
+            });
+        }
+    });
+</script>
 
 <!-- BEGIN THEME GLOBAL STYLE -->
 <script src="{{ asset('assets/js/scrollspyNav.js') }}"></script>

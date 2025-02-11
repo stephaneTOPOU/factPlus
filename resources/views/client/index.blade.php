@@ -122,53 +122,6 @@
                                                             Supprimer
                                                         </a>
 
-                                                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-                                                        <script>
-                                                            function deleteData(id) {
-                                                                const url = "{{ url('client') }}/" + id;
-                                                                const table = $('#html5-extension');
-
-                                                                Swal.fire({
-                                                                    title: 'Etes-vous sûr?',
-                                                                    text: "Vous ne pourrez pas revenir en arrière!",
-                                                                    icon: 'warning',
-                                                                    showCancelButton: true,
-                                                                    confirmButtonColor: '#3085d6',
-                                                                    cancelButtonColor: '#d33',
-                                                                    confirmButtonText: 'Oui, supprimez!'
-                                                                }).then((result) => {
-                                                                    if (result.isConfirmed) {
-                                                                        $.ajax({
-                                                                            type: 'DELETE',
-                                                                            url: url,
-                                                                            data: {
-                                                                                _token: "{{ csrf_token() }}"
-                                                                            },
-                                                                            success: function(response) {
-                                                                                Swal.fire(
-                                                                                    'Supprimé!',
-                                                                                    response.success,
-                                                                                    'success'
-                                                                                ).then(() => {
-                                                                                    table.DataTable().ajax.reload(null, false);
-                                                                                });
-                                                                            },
-                                                                            error: function(xhr) {
-                                                                                const message = xhr.responseJSON?.message || xhr.responseText;
-                                                                                Swal.fire(
-                                                                                    'Erreur!',
-                                                                                    'Une erreur est survenue : ' + message,
-                                                                                    'error'
-                                                                                );
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                });
-                                                            }
-                                                        </script>
-
-
                                                     </div>
                                                 </div>
                                             </td>
@@ -191,8 +144,66 @@
 
 @include('Footer.footer')
 
+
 <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
 <script src="{{ asset('plugins/table/datatable/datatables.js') }}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    console.log('Chargé');
+
+    function deleteData(id) {
+        const url = "{{ url('client') }}/" + id;
+        const table = $('#html5-extension').DataTable();
+
+        console.log('url généré : ', url);
+        console.log('la table : ', table);
+
+        Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            text: "Vous ne pourrez pas revenir en arrière !",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Oui, supprimez !'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        console.log("Réponse serveur :", response);
+                        Swal.fire(
+                            'Supprimé !',
+                            response.success,
+                            'success'
+                        ).then(() => {
+                            // Vérifier si DataTable est bien initialisé avant de recharger
+                            if ($.fn.DataTable.isDataTable('#html5-extension')) {
+                                table.ajax.reload(null, false);
+                            } else {
+                                console.error("DataTable n'est pas initialisé !");
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error("Erreur AJAX :", xhr);
+                        Swal.fire(
+                            'Erreur !',
+                            'Une erreur est survenue.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+</script>
+
 
 <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
 <script src="{{ asset('plugins/table/datatable/button-ext/dataTables.buttons.min.js') }}"></script>
