@@ -7,7 +7,10 @@ use App\Models\DetailsFacture;
 use App\Models\Factures;
 use App\Models\Produits;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class FactureController extends Controller
 {
@@ -42,23 +45,24 @@ class FactureController extends Controller
      */
     public function store(Request $request)
     {
-
-        $facture = $request->validate([
+        // Validation des données directement dans la requête
+        $request->validate([
             'client_id' => 'required|integer',
             'date_emission' => 'required|string|date',
             'date_echeance' => 'required|string|date',
             'status' => 'required|string',
         ]);
-        //dd($facture);
 
-        $detailFacture = $request->validate([
+        $request->validate([
             'produit_id' => 'required|integer',
             'tva' => 'required|numeric',
         ]);
-        //dd($detailFacture);
 
         try {
+            // Démarrer la transaction
+            DB::beginTransaction();
 
+            // Création de la facture
             $facture = new Factures();
             $facture->client_id = $request->client_id;
             $facture->reference_facture = Factures::generateReference();
@@ -67,17 +71,31 @@ class FactureController extends Controller
             $facture->status = $request->status;
             $facture->save();
 
+            Log::info('Facture créée avec succès', ['facture_id' => $facture->id, 'client_id' => $facture->client_id]);
 
-
+            // Création du détail de la facture
             $detailFacture = new DetailsFacture();
             $detailFacture->facture_id = $facture->id;
             $detailFacture->produit_id = $request->produit_id;
             $detailFacture->tva = $request->tva;
             $detailFacture->save();
 
-            return redirect()->back()->with('success', 'Facture Ajoutée avec succès');
+            Log::info('Détail de facture ajouté avec succès', ['facture_id' => $facture->id, 'produit_id' => $detailFacture->produit_id]);
+
+            // Validation de la transaction
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Facture ajoutée avec succès'], 200);
         } catch (Exception $e) {
-            return redirect()->back()->with('success', $e->getMessage());
+            // Annuler la transaction en cas d'erreur
+            DB::rollBack();
+
+            Log::error('Erreur lors de la création de la facture', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all()  // Vous pouvez aussi loguer les données de la requête pour un meilleur suivi
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Erreur lors de l\'ajout de la facture : ' . $e->getMessage()], 500);
         }
     }
 
@@ -116,41 +134,62 @@ class FactureController extends Controller
      */
     public function update(Request $request, $factures)
     {
-        $facture = $request->validate([
+        // Validation des données directement dans la requête
+        $request->validate([
             'client_id' => 'required|integer',
             'date_emission' => 'required|string|date',
             'date_echeance' => 'required|string|date',
             'status' => 'required|string',
         ]);
-        //dd($facture);
 
-        $detailFacture = $request->validate([
+        $request->validate([
             'produit_id' => 'required|integer',
             'tva' => 'required|numeric',
         ]);
-        //dd($detailFacture);
 
         try {
+            DB::beginTransaction(); // Démarrer la transaction
 
-            $facture = Factures::find($factures);
+            // Trouver la facture ou lever une exception si elle n'existe pas
+            $facture = Factures::findOrFail($factures);
             $facture->client_id = $request->client_id;
             $facture->date_emission = $request->date_emission;
             $facture->date_echeance = $request->date_echeance;
             $facture->status = $request->status;
-            $facture->update();
+            $facture->save();
 
-            $detailFacture = DetailsFacture::where('facture_id', $factures)->first();
+            Log::info('Facture mise à jour', ['facture_id' => $facture->id, 'client_id' => $facture->client_id]);
 
-            $detailFacture->facture_id = $facture->id;
+            // Trouver le détail de la facture ou lever une exception si introuvable
+            $detailFacture = DetailsFacture::where('facture_id', $factures)->firstOrFail();
             $detailFacture->produit_id = $request->produit_id;
             $detailFacture->tva = $request->tva;
-            $detailFacture->update();
+            $detailFacture->save();
 
-            return redirect()->back()->with('success', 'Facture mise à jour avec succès');
+            Log::info('Détail de facture mis à jour', ['facture_id' => $facture->id, 'produit_id' => $detailFacture->produit_id]);
+
+            DB::commit(); // Validation de la transaction
+
+            return response()->json(['success' => true, 'message' => 'Facture mise à jour avec succès'], 200);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack(); // Annuler la transaction
+            Log::warning('Facture ou Détail non trouvé', [
+                'facture_id' => $factures,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Facture ou Détail de facture introuvable'], 404);
         } catch (Exception $e) {
-            return redirect()->back()->with('success', $e->getMessage());
+            DB::rollBack(); // Annuler la transaction
+            Log::error('Erreur lors de la mise à jour de la facture', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Une erreur est survenue lors de la mise à jour de la facture'], 500);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -161,11 +200,33 @@ class FactureController extends Controller
     public function destroy($factures)
     {
         try {
-            $facture = Factures::find($factures);
+            DB::beginTransaction(); // Démarrer la transaction
+
+            // Trouver la facture ou lever une exception si elle n'existe pas
+            $facture = Factures::findOrFail($factures);
             $facture->delete();
-            return redirect()->back()->with('success', 'Facture supprimée avec succès');
+
+            DB::commit(); // Valider la transaction
+
+            Log::info('Facture supprimée avec succès', ['facture_id' => $facture->id]);
+
+            return response()->json(['success' => 'Facture supprimée avec succès'], 200);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack(); // Annuler la transaction
+            Log::warning('Facture introuvable', [
+                'facture_id' => $factures,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json(['error' => 'Facture introuvable'], 404);
         } catch (Exception $e) {
-            return redirect()->back()->with('success', $e->getMessage());
+            DB::rollBack(); // Annuler la transaction
+            Log::error('Erreur lors de la suppression de la facture', [
+                'error' => $e->getMessage(),
+                'facture_id' => $factures
+            ]);
+
+            return response()->json(['error' => 'Une erreur est survenue lors de la suppression de la facture'], 500);
         }
     }
 }

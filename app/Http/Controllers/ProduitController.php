@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Produits;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProduitController extends Controller
 {
@@ -37,28 +40,40 @@ class ProduitController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
+        // Validation des champs directement sur la requête
+        $request->validate([
             'categorie' => 'required|string',
             'nom' => 'required|string',
             'description' => 'required|string',
-            'prix_unitaire' => 'required|string',
-            'quantite_stock' => 'required|string',
-
+            'prix_unitaire' => 'required|numeric',
+            'quantite_stock' => 'required|integer',
         ]);
 
+        Log::info('Requête reçue pour création de produit', $request->all());
+
         try {
-            $data = new Produits();
+            DB::beginTransaction();
 
-            $data->nom = $request->nom;
-            $data->description = $request->description;
-            $data->prix_unitaire = $request->prix_unitaire;
-            $data->quantite_stock = $request->quantite_stock;
-            $data->categorie = $request->categorie;
+            $produit = new Produits();
+            $produit->nom = $request->nom;
+            $produit->description = $request->description;
+            $produit->prix_unitaire = $request->prix_unitaire;
+            $produit->quantite_stock = $request->quantite_stock;
+            $produit->categorie = $request->categorie;
 
-            $data->save();
-            return redirect()->back()->with('success', 'Produit Ajouté avec succès');
+            $produit->save();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Produit enregistré avec succès !'], 200);
         } catch (Exception $e) {
-            return redirect()->back()->with('success', $e->getMessage());
+            DB::rollBack();
+            Log::error('Erreur d\'enregistrement du produit', [
+                'erreur' => $e->getMessage(),
+                'données' => $request->all()
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Erreur : ' . $e->getMessage()], 500);
         }
     }
 
@@ -95,28 +110,48 @@ class ProduitController extends Controller
      */
     public function update(Request $request, $produits)
     {
-        $data = $request->validate([
+        // Validation des données
+        $request->validate([
             'categorie' => 'required|string',
             'nom' => 'required|string',
             'description' => 'required|string',
-            'prix_unitaire' => 'required|string',
-            'quantite_stock' => 'required|string',
-
+            'prix_unitaire' => 'required|numeric',
+            'quantite_stock' => 'required|integer',
         ]);
 
+        Log::info('Requête reçue pour mise à jour du produit', ['id' => $produits, 'données' => $request->all()]);
+
         try {
-            $data = Produits::find($produits);
+            DB::beginTransaction();
 
-            $data->categorie = $request->categorie;
-            $data->nom = $request->nom;
-            $data->description = $request->description;
-            $data->prix_unitaire = $request->prix_unitaire;
-            $data->quantite_stock = $request->quantite_stock;
+            // Recherche du produit
+            $produit = Produits::findOrFail($produits);
 
-            $data->update();
-            return redirect()->back()->with('success', 'Produit mis à jour avec succès');
+            if (!$produit) {
+                return response()->json(['success' => false, 'message' => 'Produit non trouvé'], 404);
+            }
+
+            // Mise à jour des champs
+            $produit->categorie = $request->categorie;
+            $produit->nom = $request->nom;
+            $produit->description = $request->description;
+            $produit->prix_unitaire = $request->prix_unitaire;
+            $produit->quantite_stock = $request->quantite_stock;
+
+            $produit->save();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Produit mis à jour avec succès !'], 200);
         } catch (Exception $e) {
-            return redirect()->back()->with('success', $e->getMessage());
+            DB::rollBack();
+            Log::error('Erreur lors de la mise à jour du produit', [
+                'erreur' => $e->getMessage(),
+                'id' => $produits,
+                'données' => $request->all()
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Erreur : ' . $e->getMessage()], 500);
         }
     }
 
@@ -128,12 +163,31 @@ class ProduitController extends Controller
      */
     public function destroy($produits)
     {
-        $produit = Produits::find($produits);
         try {
+            DB::beginTransaction(); // Début de la transaction
+
+            $produit = Produits::findOrFail($produits); // Trouver le produit ou lever une exception
+
             $produit->delete();
-            return response()->json(['success' => 'Produit supprimé avec succès !']);
+
+            DB::commit(); // Valider la transaction
+
+            Log::info('Produit supprimé avec succès', ['id' => $produits]);
+
+            return response()->json(['success' => true, 'message' => 'Produit supprimé avec succès !'], 200);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack(); // Annuler la transaction en cas d'erreur
+            Log::warning('Tentative de suppression d\'un produit introuvable', ['id' => $produits]);
+
+            return response()->json(['success' => false, 'message' => 'Produit introuvable'], 404);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Une erreur est survenue'], 500);
+            DB::rollBack(); // Annuler la transaction en cas d'erreur
+            Log::error('Erreur lors de la suppression du produit', [
+                'erreur' => $e->getMessage(),
+                'id' => $produits
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Une erreur est survenue : ' . $e->getMessage()], 500);
         }
     }
 }

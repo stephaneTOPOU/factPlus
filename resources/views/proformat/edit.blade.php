@@ -42,8 +42,8 @@
                                 </div>
                             </div>
                             <div class="widget-content widget-content-area">
-                                <form method="POST" action="{{ route('proformat.update',$proformat->id) }}"
-                                    enctype="multipart/form-data">
+                                <form method="POST" action="{{ route('proformat.update', $proformat->id) }}"
+                                    enctype="multipart/form-data" id="client-form">
                                     @csrf
                                     @method('PUT')
                                     <div class="form-group row  mb-4">
@@ -53,7 +53,9 @@
                                             <select class="form-control" id="client_id" name="client_id">
                                                 <option value="">Choisir un client</option>
                                                 @foreach ($clients as $client)
-                                                    <option value="{{ $client->id }}" @if ($client->id == $proformat->client_id) selected @endif>{{ $client->nom }}</option>
+                                                    <option value="{{ $client->id }}"
+                                                        @if ($client->id == $proformat->client_id) selected @endif>
+                                                        {{ $client->nom }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -115,7 +117,9 @@
                                                 <option value="">Choisir un produit</option>
                                                 @foreach ($produits as $produit)
                                                     @foreach ($proformat->detailProformat as $detail)
-                                                    <option value="{{ $produit->id }}" @if ($produit->id == $detail->produit_id) selected @endif>{{ $produit->nom }}</option>
+                                                        <option value="{{ $produit->id }}"
+                                                            @if ($produit->id == $detail->produit_id) selected @endif>
+                                                            {{ $produit->nom }}</option>
                                                     @endforeach
                                                 @endforeach
                                             </select>
@@ -190,9 +194,9 @@
                                         <label for="tva"
                                             class="col-sm-2 col-form-label col-form-label-sm">TVA</label>
                                         <div class="col-sm-10">
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="tva" placeholder="TVA"
-                                                name="tva" required @foreach ($proformat->detailProformat as $detail) value="{{ old('tva') ?? $detail->tva }}" @endforeach>
+                                            <input type="number" class="form-control form-control-sm" id="tva"
+                                                placeholder="TVA" name="tva" required
+                                                @foreach ($proformat->detailProformat as $detail) value="{{ old('tva') ?? $detail->tva }}" @endforeach>
                                         </div>
                                     </div>
 
@@ -202,7 +206,8 @@
                                         <div class="col-sm-10">
                                             <input type="date" class="form-control form-control-sm"
                                                 id="date_emission" placeholder="Date d'émission" name="date_emission"
-                                                required value="{{ old('date_emission') ?? $proformat->date_emission }}">
+                                                required
+                                                value="{{ old('date_emission') ?? $proformat->date_emission }}">
                                         </div>
                                     </div>
 
@@ -212,7 +217,8 @@
                                         <div class="col-sm-10">
                                             <input type="date" class="form-control form-control-sm"
                                                 id="date_echeance" placeholder="Date d'échéance" name="date_echeance"
-                                                required value="{{ old('date_echeance') ?? $proformat->date_echeance }}">
+                                                required
+                                                value="{{ old('date_echeance') ?? $proformat->date_echeance }}">
                                         </div>
                                     </div>
 
@@ -222,9 +228,15 @@
                                         <div class="col-sm-10">
                                             <select class="form-control" id="status" name="status">
                                                 <option value="">Choisir un status</option>
-                                                <option value="en attente" {{ old('status', $proformat->status ?? '') == 'en attente' ? 'selected' : '' }}>en attente</option>
-                                                <option value="payée" {{ old('status', $proformat->status ?? '') == 'payée' ? 'selected' : '' }}>payée</option>
-                                                <option value="annulée" {{ old('status', $proformat->status ?? '') == 'annulée' ? 'selected' : '' }}>annulée</option>
+                                                <option value="en attente"
+                                                    {{ old('status', $proformat->status ?? '') == 'en attente' ? 'selected' : '' }}>
+                                                    en attente</option>
+                                                <option value="payée"
+                                                    {{ old('status', $proformat->status ?? '') == 'payée' ? 'selected' : '' }}>
+                                                    payée</option>
+                                                <option value="annulée"
+                                                    {{ old('status', $proformat->status ?? '') == 'annulée' ? 'selected' : '' }}>
+                                                    annulée</option>
                                             </select>
                                         </div>
                                     </div>
@@ -251,8 +263,61 @@
 
 @include('Footer.footer')
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('client-form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Empêche le rechargement de la page
 
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('input[name="_token"]').value;
+
+        console.log('FormData:', formData);
+        console.log('CSRF Token:', csrfToken);
+        try {
+            const response = await fetch(this.action, {
+                method: this.method,
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    title: 'Succès !',
+                    text: data.message,
+                    type: 'success',
+                    confirmButtonText: 'OK',
+                    padding: '2em'
+                }).then(() => {
+                    window.location.reload(); // Recharge la page ou redirige
+                });
+            } else {
+                Swal.fire({
+                    title: 'Erreur',
+                    text: data.message || 'Une erreur est survenue.',
+                    type: 'error',
+                    confirmButtonText: 'OK',
+                    padding: '2em'
+                });
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Erreur lors de la soumission.',
+                type: 'error',
+                confirmButtonText: 'OK',
+                padding: '2em'
+            });
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     // Fonction pour récupérer et remplir les champs de formulaire
     async function fetchData(url, mapping) {

@@ -44,7 +44,7 @@
                             <div class="widget-content widget-content-area">
                                 @if (session('success'))
                                     <script>
-                                        $('.widget-content .success').on('click', function () {
+                                        $('.widget-content .success').on('click', function() {
                                             Swal.fire({
                                                 title: 'Succès',
                                                 text: '{{ session('success') }}',
@@ -56,7 +56,8 @@
                                 @endif
 
 
-                                <form method="POST" action="{{ route('client.update',$client->id) }}" enctype="multipart/form-data" id="client-form">
+                                <form method="POST" action="{{ route('client.update', $client->id) }}"
+                                    enctype="multipart/form-data" id="client-form">
                                     @csrf
                                     @method('PUT')
 
@@ -66,8 +67,12 @@
                                         <div class="col-sm-10">
                                             <select class="form-control" id="type_client" name="type_client">
                                                 <option value="">Choisir le type</option>
-                                                <option value="Entreprise" {{ old('type_client', $client->type_client ?? '') == 'Entreprise' ? 'selected' : '' }}>Entreprise</option>
-                                                <option value="Particulier" {{ old('type_client', $client->type_client ?? '') == 'Particulier' ? 'selected' : '' }}>Particulier</option>
+                                                <option value="Entreprise"
+                                                    {{ old('type_client', $client->type_client ?? '') == 'Entreprise' ? 'selected' : '' }}>
+                                                    Entreprise</option>
+                                                <option value="Particulier"
+                                                    {{ old('type_client', $client->type_client ?? '') == 'Particulier' ? 'selected' : '' }}>
+                                                    Particulier</option>
                                             </select>
                                         </div>
                                     </div>
@@ -78,12 +83,13 @@
                                             client</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control form-control-sm" id="entreprise"
-                                                placeholder="Entreprise du client" name="entreprise" required value="{{ old('entreprise') ?? $client->entreprise }}">
+                                                placeholder="Entreprise du client" name="entreprise" required
+                                                value="{{ old('entreprise') ?? $client->entreprise }}">
                                         </div>
                                     </div>
 
                                     <script>
-                                        document.addEventListener('DOMContentLoaded', function () {
+                                        document.addEventListener('DOMContentLoaded', function() {
                                             const typeClientSelect = document.getElementById('type_client');
                                             const entrepriseField = document.getElementById('entreprise_field');
                                             const entrepriseInput = document.getElementById('entreprise');
@@ -113,7 +119,8 @@
                                             class="col-sm-2 col-form-label col-form-label-sm">Nom</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control form-control-sm" id="nom"
-                                                placeholder="Nom" name="nom" required value="{{ old('nom') ?? $client->nom }}">
+                                                placeholder="Nom" name="nom" required
+                                                value="{{ old('nom') ?? $client->nom }}">
                                         </div>
                                     </div>
 
@@ -122,7 +129,8 @@
                                             class="col-sm-2 col-form-label col-form-label-sm">Prénom</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control form-control-sm" id="prenom"
-                                                placeholder="Prénom" name="prenom" required value="{{ old('prenom') ?? $client->prenom }}">
+                                                placeholder="Prénom" name="prenom" required
+                                                value="{{ old('prenom') ?? $client->prenom }}">
                                         </div>
                                     </div>
 
@@ -131,7 +139,8 @@
                                             class="col-sm-2 col-form-label col-form-label-sm">Email</label>
                                         <div class="col-sm-10">
                                             <input type="email" class="form-control form-control-sm" id="email"
-                                                placeholder="Email" name="email" required value="{{ old('email') ?? $client->email }}">
+                                                placeholder="Email" name="email" required
+                                                value="{{ old('email') ?? $client->email }}">
                                         </div>
                                     </div>
 
@@ -140,7 +149,8 @@
                                             class="col-sm-2 col-form-label col-form-label-sm">Téléphone</label>
                                         <div class="col-sm-10">
                                             <input type="tel" class="form-control form-control-sm" id="telephone"
-                                                placeholder="Téléphone" name="telephone" required value="{{ old('telephone') ?? $client->telephone }}">
+                                                placeholder="Téléphone" name="telephone" required
+                                                value="{{ old('telephone') ?? $client->telephone }}">
                                         </div>
                                     </div>
 
@@ -149,7 +159,8 @@
                                             class="col-sm-2 col-form-label col-form-label-sm">Adresse</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control form-control-sm" id="adresse"
-                                                placeholder="Adresse" name="adresse" required value="{{ old('adresse') ?? $client->adresse }}">
+                                                placeholder="Adresse" name="adresse" required
+                                                value="{{ old('adresse') ?? $client->adresse }}">
                                         </div>
                                     </div>
                                     <input type="submit" name="time" required class="btn btn-primary"

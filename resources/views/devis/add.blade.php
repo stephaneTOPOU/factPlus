@@ -43,8 +43,9 @@
                             </div>
                             <div class="widget-content widget-content-area">
                                 <form method="POST" action="{{ route('devis.store') }}"
-                                    enctype="multipart/form-data">
+                                    enctype="multipart/form-data" id="client-form">
                                     @csrf
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <div class="form-group row  mb-4">
                                         <label for="client_id" class="col-sm-2 col-form-label col-form-label-sm">Nom du
                                             client</label>
@@ -296,6 +297,60 @@
             document.getElementById('categorie').value = '';
             document.getElementById('quantite_stock').value = '';
             document.getElementById('prix_unitaire').value = '';
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('client-form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Empêche le rechargement de la page
+
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('input[name="_token"]').value;
+
+        console.log('FormData:', formData);
+        console.log('CSRF Token:', csrfToken);
+        try {
+            const response = await fetch(this.action, {
+                method: this.method,
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    title: 'Succès !',
+                    text: data.message,
+                    type: 'success',
+                    confirmButtonText: 'OK',
+                    padding: '2em'
+                }).then(() => {
+                    window.location.reload(); // Recharge la page ou redirige
+                });
+            } else {
+                Swal.fire({
+                    title: 'Erreur',
+                    text: data.message || 'Une erreur est survenue.',
+                    type: 'error',
+                    confirmButtonText: 'OK',
+                    padding: '2em'
+                });
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Erreur lors de la soumission.',
+                type: 'error',
+                confirmButtonText: 'OK',
+                padding: '2em'
+            });
         }
     });
 </script>

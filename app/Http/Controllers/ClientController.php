@@ -39,46 +39,47 @@ class ClientController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-{
-    // Validation des champs
-    $validatedData = $request->validate([
-        'type_client' => 'required|string',
-        'nom' => 'required|string|max:255',
-        'prenom' => 'required|string|max:255',
-        'email' => 'required|email|unique:clients',
-        'telephone' => 'required|regex:/^\+?[0-9]{10,15}$/',
-        'adresse' => 'required|string|max:500',
-        'entreprise' => 'required_if:type_client,Entreprise|nullable|string|max:255',
-    ]);
-
-    Log::info('Requête reçue pour création de client', $validatedData);
-
-    try {
-        DB::beginTransaction();
-
-        $client = new Clients();
-        $client->type_client = $validatedData['type_client'];
-        $client->nom = $validatedData['nom'];
-        $client->prenom = $validatedData['prenom'];
-        $client->email = $validatedData['email'];
-        $client->telephone = $validatedData['telephone'];
-        $client->adresse = $validatedData['adresse'];
-        $client->entreprise = $validatedData['entreprise'] ?? null;
-
-        $client->save();
-
-        DB::commit();
-
-        return response()->json(['success' => true, 'message' => 'Client enregistré avec succès !'], 200);
-    } catch (Exception $e) {
-        DB::rollBack();
-        Log::error('Erreur d\'enregistrement du client', [
-            'erreur' => $e->getMessage(),
-            'données' => $validatedData
+    {
+        // Validation des champs directement sur la requête
+        $request->validate([
+            'type_client' => 'required|string',
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|unique:clients',
+            'telephone' => 'required|regex:/^\+?[0-9]{10,15}$/',
+            'adresse' => 'required|string|max:500',
+            'entreprise' => 'required_if:type_client,Entreprise|nullable|string|max:255',
         ]);
-        return response()->json(['success' => false, 'message' => 'Erreur : ' . $e->getMessage()], 500);
+
+        Log::info('Requête reçue pour création de client', $request->all());
+
+        try {
+            DB::beginTransaction();
+
+            $client = new Clients();
+            $client->type_client = $request->type_client;
+            $client->nom = $request->nom;
+            $client->prenom = $request->prenom;
+            $client->email = $request->email;
+            $client->telephone = $request->telephone;
+            $client->adresse = $request->adresse;
+            $client->entreprise = $request->entreprise ?? null;
+
+            $client->save();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Client enregistré avec succès !'], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur d\'enregistrement du client', [
+                'erreur' => $e->getMessage(),
+                'données' => $request->all()
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Erreur : ' . $e->getMessage()], 500);
+        }
     }
-}
 
     /**
      * Display the specified resource.
@@ -159,16 +160,32 @@ class ClientController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($clients)
-{
-    try {
-        $client = Clients::findOrFail($clients); // Utilisation de findOrFail pour gérer l'absence de client
-        $client->delete();
+    {
+        try {
+            DB::beginTransaction(); // Début de la transaction
 
-        return response()->json(['success' => 'Client supprimé avec succès !'], 200);
-    } catch (ModelNotFoundException $e) {
-        return response()->json(['error' => 'Client introuvable'], 404);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Une erreur est survenue : ' . $e->getMessage()], 500);
+            $client = Clients::findOrFail($clients); // Trouver le client ou lever une exception
+
+            $client->delete();
+
+            DB::commit(); // Valider la transaction
+
+            Log::info('Client supprimé avec succès', ['id' => $clients]);
+
+            return response()->json(['success' => true, 'message' => 'Client supprimé avec succès !'], 200);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack(); // Annuler la transaction en cas d'erreur
+            Log::warning('Tentative de suppression d\'un client introuvable', ['id' => $clients]);
+
+            return response()->json(['success' => false, 'message' => 'Client introuvable'], 404);
+        } catch (Exception $e) {
+            DB::rollBack(); // Annuler la transaction en cas d'erreur
+            Log::error('Erreur lors de la suppression du client', [
+                'erreur' => $e->getMessage(),
+                'id' => $clients
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Une erreur est survenue : ' . $e->getMessage()], 500);
+        }
     }
-}
 }

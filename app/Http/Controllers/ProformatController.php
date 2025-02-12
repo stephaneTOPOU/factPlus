@@ -7,7 +7,10 @@ use App\Models\DetailsProformat;
 use App\Models\Produits;
 use App\Models\Proformats;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProformatController extends Controller
 {
@@ -42,41 +45,71 @@ class ProformatController extends Controller
      */
     public function store(Request $request)
     {
-        $proformats = $request->validate([
+        // Validation des données directement dans la requête
+        $request->validate([
             'client_id' => 'required|integer',
             'date_emission' => 'required|string|date',
             'date_echeance' => 'required|string|date',
             'status' => 'required|string',
         ]);
-        //dd($proformats);
 
-        $detailProformats = $request->validate([
+        $request->validate([
             'produit_id' => 'required|integer',
             'tva' => 'required|numeric',
         ]);
-        //dd($detailProformats);
 
         try {
+            // Démarrer la transaction
+            DB::beginTransaction();
 
-            $proformats = new Proformats();
-            $proformats->client_id = $request->client_id;
-            $proformats->reference_proformat = Proformats::generateReference();
-            $proformats->date_emission = $request->date_emission;
-            $proformats->date_echeance = $request->date_echeance;
-            $proformats->status = $request->status;
-            $proformats->save();
+            // Création du proformat
+            $proformat = new Proformats();
+            $proformat->client_id = $request->client_id;
+            $proformat->reference_proformat = Proformats::generateReference();
+            $proformat->date_emission = $request->date_emission;
+            $proformat->date_echeance = $request->date_echeance;
+            $proformat->status = $request->status;
+            $proformat->save();
 
-            $detailProformats = new DetailsProformat();
-            $detailProformats->proformat_id = $proformats->id;
-            $detailProformats->produit_id = $request->produit_id;
-            $detailProformats->tva = $request->tva;
-            $detailProformats->save();
+            Log::info('Proformat créé avec succès', ['proformat_id' => $proformat->id, 'client_id' => $proformat->client_id]);
 
-            return redirect()->back()->with('success', 'Proformat Ajouté avec succès');
+            // Création du détail du proformat
+            $detailProformat = new DetailsProformat();
+            $detailProformat->proformat_id = $proformat->id;
+            $detailProformat->produit_id = $request->produit_id;
+            $detailProformat->tva = $request->tva;
+            $detailProformat->save();
+
+            Log::info('Détail de proformat ajouté avec succès', ['proformat_id' => $proformat->id, 'produit_id' => $detailProformat->produit_id]);
+
+            // Validation de la transaction
+            DB::commit();
+
+            // Retourner une réponse JSON en cas de succès
+            return response()->json([
+                'success' => true,
+                'message' => 'Proformat ajouté avec succès',
+
+            ], 200);
         } catch (Exception $e) {
-            return redirect()->back()->with('success', $e->getMessage());
+            // Annuler la transaction en cas d'erreur
+            DB::rollBack();
+
+            Log::error('Erreur lors de la création du proformat', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all(),
+            ]);
+
+            // Retourner une réponse JSON en cas d'erreur
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'ajout du proformat',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
+
+
 
     /**
      * Display the specified resource.
@@ -113,41 +146,73 @@ class ProformatController extends Controller
      */
     public function update(Request $request, $proformats)
     {
-        $proformat = $request->validate([
+        // Validation des données directement dans la requête
+        $request->validate([
             'client_id' => 'required|integer',
             'date_emission' => 'required|string|date',
             'date_echeance' => 'required|string|date',
             'status' => 'required|string',
         ]);
-        //dd($proformat);
 
-        $detailProformats = $request->validate([
+        $request->validate([
             'produit_id' => 'required|integer',
             'tva' => 'required|numeric',
         ]);
-        //dd($detailProformats);
 
         try {
+            DB::beginTransaction(); // Démarrer la transaction
 
-            $proformat = Proformats::find($proformats);
+            // Trouver le proformat ou lever une exception si introuvable
+            $proformat = Proformats::findOrFail($proformats);
             $proformat->client_id = $request->client_id;
             $proformat->date_emission = $request->date_emission;
             $proformat->date_echeance = $request->date_echeance;
             $proformat->status = $request->status;
-            $proformat->update();
+            $proformat->save();
 
-            $detailProformats = DetailsProformat::where('proformat_id', $proformat->id)->first();
+            Log::info('Proformat mis à jour', ['proformat_id' => $proformat->id, 'client_id' => $proformat->client_id]);
 
-            $detailProformats->proformat_id = $proformat->id;
-            $detailProformats->produit_id = $request->produit_id;
-            $detailProformats->tva = $request->tva;
-            $detailProformats->update();
+            // Trouver le détail du proformat ou lever une exception si introuvable
+            $detailProformat = DetailsProformat::where('proformat_id', $proformats)->firstOrFail();
+            $detailProformat->produit_id = $request->produit_id;
+            $detailProformat->tva = $request->tva;
+            $detailProformat->save();
 
-            return redirect()->back()->with('success', 'Proformat mis à jour avec succès');
+            Log::info('Détail de proformat mis à jour', ['proformat_id' => $proformat->id, 'produit_id' => $detailProformat->produit_id]);
+
+            DB::commit(); // Validation de la transaction
+
+            // Réponse JSON en cas de succès
+            return response()->json([
+                'success' => true,
+                'message' => 'Proformat mis à jour avec succès'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack(); // Annuler la transaction
+            Log::warning('Proformat ou Détail non trouvé', [
+                'proformat_id' => $proformats,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Proformat ou Détail de proformat introuvable'
+            ], 404);
         } catch (Exception $e) {
-            return redirect()->back()->with('success', $e->getMessage());
+            DB::rollBack(); // Annuler la transaction
+            Log::error('Erreur lors de la mise à jour du proformat', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de la mise à jour du proformat'
+            ], 500);
         }
     }
+
+
 
     /**
      * Remove the specified resource from storage.
@@ -157,8 +222,43 @@ class ProformatController extends Controller
      */
     public function destroy($proformats)
     {
-        $proformat = Proformats::find($proformats);
-        $proformat->delete();
-        return redirect()->back()->with('success', 'Proformat supprimé avec succès');
+        try {
+            DB::beginTransaction(); // Démarrer la transaction
+
+            // Trouver le proformat ou lever une exception si introuvable
+            $proformat = Proformats::findOrFail($proformats);
+
+            // Supprimer le proformat
+            $proformat->delete();
+
+            DB::commit(); // Validation de la transaction
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Proformat et ses détails supprimés avec succès'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack(); // Annuler la transaction
+            Log::warning('Proformat introuvable pour suppression', [
+                'proformat_id' => $proformats,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Proformat non trouvé'
+            ], 404);
+        } catch (Exception $e) {
+            DB::rollBack(); // Annuler la transaction
+            Log::error('Erreur lors de la suppression du proformat', [
+                'error' => $e->getMessage(),
+                'proformat_id' => $proformats
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression du proformat'
+            ], 500);
+        }
     }
 }
