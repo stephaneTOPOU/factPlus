@@ -4,11 +4,17 @@
 <script src="{{ asset('bootstrap/js/bootstrap.min.js') }}"></script>
 <script src="{{ asset('plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/app.js') }}"></script>
+
 <script>
     $(document).ready(function() {
-        App.init();
+        if (typeof App !== 'undefined' && typeof App.init === 'function') {
+            App.init();
+        } else {
+            console.error("L'objet 'App' ou la méthode 'init' est introuvable.");
+        }
     });
 </script>
+
 <script src="{{ asset('assets/js/custom.js') }}"></script>
 <!-- END GLOBAL MANDATORY SCRIPTS -->
 
