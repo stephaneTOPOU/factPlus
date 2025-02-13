@@ -592,38 +592,43 @@
                                                 <div class="th-content">Catégorie</div>
                                             </th>
                                             <th>
-                                                <div class="th-content th-heading">Quantiét</div>
+                                                <div class="th-content th-heading">Qté en Stock</div>
                                             </th>
                                             <th>
                                                 <div class="th-content th-heading">Prix unitaire</div>
                                             </th>
                                             <th>
-                                                <div class="th-content">Total</div>
+                                                <div class="th-content">Qté Vendue</div>
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content product-name"><img
-                                                        src="{{ asset('assets/img/speaker.jpg') }}"
-                                                        alt="product">Speakers</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="pricing">$84.00</span></div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="discount-pricing">$10.00</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">240</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><a href="javascript:void(0);"
-                                                        class="">Direct</a></div>
-                                            </td>
-                                        </tr>
+                                        @foreach ($produits as $produit)
+                                            <tr>
+                                                <td>
+                                                    <div class="td-content product-name"><img
+                                                            src="{{ asset('assets/img/speaker.jpg') }}"
+                                                            alt="product">{{ $produit->nom }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="td-content"><span
+                                                            class="pricing">{{ $produit->categorie }}</span></div>
+                                                </td>
+                                                <td>
+                                                    <div class="td-content"><span
+                                                            class="discount-pricing">{{ $produit->quantite_stock }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="td-content">{{ $produit->prix_unitaire }}</div>
+                                                </td>
+                                                @foreach ($produit->detailsFacture as $detail)
+                                                    <td>
+                                                        <div class="td-content">{{ $detail->total_vendu }}</div>
+                                                    </td>
+                                                @endforeach
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>

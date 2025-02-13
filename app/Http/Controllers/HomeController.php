@@ -18,12 +18,12 @@ class HomeController extends Controller
             })
             ->get();
         $orders = Factures::with(['client', 'detailsFacture.produit'])->take(7)->get();
-        $produits = Produits::select('produits.id', 'produits.nom', DB::raw('SUM(details_factures.quantite) as total_vendu'))
+        $produits = Produits::select('produits.nom', 'produits.categorie', 'produits.quantite_stock', 'produits.prix_unitaire', DB::raw('SUM(details_factures.quantite) as total_vendu'))
             ->join('details_factures', 'produits.id', '=', 'details_factures.produit_id')
-            ->groupBy('produits.id', 'produits.nom')
+            ->groupBy('produits.nom', 'produits.categorie', 'produits.quantite_stock', 'produits.prix_unitaire')
             ->orderByDesc('total_vendu')
             ->limit(7)
             ->get();
-        return view('index', compact('transactions', 'orders'));
+        return view('index', compact('transactions', 'orders', 'produits'));
     }
 }

@@ -157,7 +157,6 @@
 </div>
 <!-- END MAIN CONTAINER -->
 
-
 @include('Footer.footer')
 
 <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->

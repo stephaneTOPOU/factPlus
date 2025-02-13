@@ -45,60 +45,74 @@ class FactureController extends Controller
      */
     public function store(Request $request)
     {
-        // Validation des données directement dans la requête
-        $request->validate([
-            'client_id' => 'required|integer',
-            'date_emission' => 'required|string|date',
-            'date_echeance' => 'required|string|date',
-            'status' => 'required|string',
-        ]);
-
-        $request->validate([
-            'produit_id' => 'required|integer',
-            'tva' => 'required|numeric',
+        $validated = $request->validate([
+            'client_id' => 'required|integer|exists:clients,id',
+            'date_emission' => 'required|date',
+            'date_echeance' => 'required|date|after_or_equal:date_emission',
+            'status' => 'required|string|in:en attente,payée,annulée',
+            'produits' => 'required|array|min:1',
+            'produits.*.produit_id' => 'required|integer|exists:produits,id',
+            'produits.*.quantite' => 'required|integer|min:1',
+            'produits.*.tva' => 'required|numeric|min:0',
         ]);
 
         try {
-            // Démarrer la transaction
             DB::beginTransaction();
 
             // Création de la facture
-            $facture = new Factures();
-            $facture->client_id = $request->client_id;
-            $facture->reference_facture = Factures::generateReference();
-            $facture->date_emission = $request->date_emission;
-            $facture->date_echeance = $request->date_echeance;
-            $facture->status = $request->status;
-            $facture->save();
+            $facture = Factures::create([
+                'client_id' => $validated['client_id'],
+                'reference_facture' => Factures::generateReference(),
+                'date_emission' => $validated['date_emission'],
+                'date_echeance' => $validated['date_echeance'],
+                'status' => $validated['status']
+            ]);
 
-            Log::info('Facture créée avec succès', ['facture_id' => $facture->id, 'client_id' => $facture->client_id]);
+            Log::info('Facture créée avec succès', ['facture_id' => $facture->id]);
 
-            // Création du détail de la facture
-            $detailFacture = new DetailsFacture();
-            $detailFacture->facture_id = $facture->id;
-            $detailFacture->produit_id = $request->produit_id;
-            $detailFacture->quantite = $request->quantite;
-            $detailFacture->tva = $request->tva;
-            $detailFacture->save();
+            foreach ($validated['produits'] as $produitData) {
+                $produit = Produits::findOrFail($produitData['produit_id']);
 
-            Log::info('Détail de facture ajouté avec succès', ['facture_id' => $facture->id, 'produit_id' => $detailFacture->produit_id]);
+                if ($produit->quantite_stock < $produitData['quantite']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stock insuffisant pour le produit : {$produit->nom}"
+                    ], 400);
+                }
 
-            // Validation de la transaction
+                DetailsFacture::create([
+                    'facture_id' => $facture->id,
+                    'produit_id' => $produitData['produit_id'],
+                    'quantite' => $produitData['quantite'],
+                    'tva' => $produitData['tva']
+                ]);
+
+                // Mise à jour du stock
+                $produit->decrement('quantite_stock', $produitData['quantite']);
+            }
+
             DB::commit();
 
-            return response()->json(['success' => true, 'message' => 'Facture ajoutée avec succès'], 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Facture ajoutée avec succès',
+                'facture' => $facture->load('details')
+            ], 200);
         } catch (Exception $e) {
-            // Annuler la transaction en cas d'erreur
             DB::rollBack();
 
             Log::error('Erreur lors de la création de la facture', [
                 'error' => $e->getMessage(),
-                'request_data' => $request->all()  // Vous pouvez aussi loguer les données de la requête pour un meilleur suivi
+                'request_data' => $request->all()
             ]);
 
-            return response()->json(['success' => false, 'message' => 'Erreur lors de l\'ajout de la facture : ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'ajout de la facture : ' . $e->getMessage()
+            ], 500);
         }
     }
+
 
     /**
      * Display the specified resource.

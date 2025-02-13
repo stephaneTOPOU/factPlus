@@ -12,6 +12,8 @@
 <link href="{{ asset('assets/css/components/custom-sweetalert.css') }}" rel="stylesheet" type="text/css" />
 <!-- END THEME GLOBAL STYLES -->
 
+<link href="assets/css/components/custom-modal.css" rel="stylesheet" type="text/css" />
+
 @include('head.head4')
 @include('head.head5')
 
@@ -27,7 +29,6 @@
     <!--  BEGIN CONTENT AREA  -->
     <div id="content" class="main-content">
         <div class="row layout-top-spacing">
-
             <div class="container">
 
                 <div class="row">
@@ -97,18 +98,23 @@
                                         });
                                     </script>
 
-                                    <div class="form-group row  mb-4">
-                                        <label for="produit_id" class="col-sm-2 col-form-label col-form-label-sm">Nom du
-                                            produit</label>
-                                        <div class="col-sm-10">
-                                            <select class="form-control" id="produit_id" name="produit_id">
-                                                <option value="">Choisir un produit</option>
-                                                @foreach ($produits as $produit)
-                                                    <option value="{{ $produit->id }}">{{ $produit->nom }}</option>
-                                                @endforeach
-                                            </select>
+                                    <div id="produits">
+                                        <div class="form-group row  mb-4 produit-item">
+                                            <label for="produit_id"
+                                                class="col-sm-2 col-form-label col-form-label-sm">Nom du
+                                                produit</label>
+                                            <div class="col-sm-10">
+                                                <select class="form-control" id="produit_id" name="produit_id">
+                                                    <option value="">Choisir un produit</option>
+                                                    @foreach ($produits as $produit)
+                                                        <option value="{{ $produit->id }}">{{ $produit->nom }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
+
 
                                     <div class="form-group row  mb-4" id="kt_field" style="display: none;">
                                         <label for="categorie"
@@ -121,11 +127,11 @@
 
                                     <div class="form-group row  mb-4" id="qte_field" style="display: none;">
                                         <label for="quantite_stock"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
+                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité en stock</label>
                                         <div class="col-sm-10">
                                             <input type="number" class="form-control form-control-sm"
-                                                id="quantite_stock" placeholder="Quantité" name="quantite_stock"
-                                                required readonly>
+                                                id="quantite_stock" placeholder="Quantité en stock"
+                                                name="quantite_stock" required readonly>
                                         </div>
                                     </div>
 
@@ -238,6 +244,11 @@
                                         </div>
                                     </div>
 
+                                    <!-- Bouton pour ajouter d'autres produits -->
+                                    <input type="button" id="addProduit" class="btn btn-secondary"
+                                        value="Ajouter un autre produit" data-toggle="modal"
+                                        data-target=".bd-example-modal-lg" />
+
                                     <input type="submit" name="time" required class="btn btn-primary"
                                         value="Ajouter">
                                 </form>
@@ -247,18 +258,112 @@
                 </div>
 
             </div>
-
         </div>
-
     </div>
-</div>
-</div>
-<!--  END CONTENT AREA  -->
-</div>
-<!-- END MAIN CONTAINER -->
 
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Ajouter un nouveau
+                        produit</h5>
+
+                </div>
+                <div class="modal-body">
+
+                    <form id="produitForm">
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="produit2_id">Nom du
+                                Produit</label>
+                            <div class="col-sm-10">
+                                <select id="produit2_id" class="form-control" required>
+                                    <option value="">Choisir un produit</option>
+                                    @foreach ($produits as $produit)
+                                        <option value="{{ $produit->id }}">
+                                            {{ $produit->nom }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="quantite2">Quantité</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="quantite2" class="form-control" required min="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="tva2">TVA (%)</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="tva2" class="form-control" required min="0"
+                                    step="0.01">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Fermer</button>
+                    <button type="button" class="btn btn-primary" id="addProduitBtn">Ajouter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 @include('Footer.footer')
+
+<script>
+    let produitIndex = 0;
+
+    // Fonction pour ajouter un produit à la liste
+    document.getElementById('addProduitBtn').addEventListener('click', function() {
+        // Récupérer les valeurs du formulaire modal
+        const produitId = document.getElementById('produit2_id').value;
+        const quantite = document.getElementById('quantite2').value;
+        const tva = document.getElementById('tva2').value;
+
+        // Vérifier que toutes les informations sont remplies
+        if (produitId && quantite && tva) {
+            // Créer un nouvel élément pour afficher le produit ajouté
+            const produitsContainer = document.getElementById('produits');
+            const newProduitItem = document.createElement('div');
+            newProduitItem.classList.add('form-group', 'row', 'mb-4', 'produit-item');
+            newProduitItem.innerHTML = `
+                <div class="col-md-4">
+                    <input type="text" name="produits[${produitIndex}][produit_id]" value="${produitId}" hidden>
+                    <span>${document.querySelector(`#produit_id option[value="${produitId}"]`).text}</span>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="produits[${produitIndex}][quantite]" value="${quantite}" class="form-control" readonly>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="produits[${produitIndex}][tva]" value="${tva}" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger remove-produit" onclick="removeProduit(this)">Supprimer</button>
+                </div>
+            `;
+            produitsContainer.appendChild(newProduitItem);
+
+            // Réinitialiser le formulaire modal
+            document.getElementById('produitForm').reset();
+
+            // Fermer le modal
+            $('#addProduitModal').modal('hide');
+            produitIndex++;
+        } else {
+            alert('Veuillez remplir tous les champs.');
+        }
+    });
+
+    // Fonction pour supprimer un produit
+    function removeProduit(button) {
+        button.closest('.produit-item').remove();
+    }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>

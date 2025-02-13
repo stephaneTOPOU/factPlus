@@ -27,7 +27,6 @@
     <!--  BEGIN CONTENT AREA  -->
     <div id="content" class="main-content">
         <div class="row layout-top-spacing">
-
             <div class="container">
 
                 <div class="row">
@@ -260,16 +259,9 @@
                 </div>
 
             </div>
-
         </div>
-
     </div>
 </div>
-</div>
-<!--  END CONTENT AREA  -->
-</div>
-<!-- END MAIN CONTAINER -->
-
 
 @include('Footer.footer')
 

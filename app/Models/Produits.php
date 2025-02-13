@@ -17,20 +17,20 @@ class Produits extends Model
         'prix_unitaire',
         'quantite_stock',
         'categorie',
-        
+
     ];
 
-    public function DetailsFacture()
+    public function detailsFacture()
     {
         return $this->hasMany(DetailsFacture::class, 'produit_id');
     }
 
-    public function DetailsDevis()
+    public function detailsDevis()
     {
         return $this->hasMany(DetailsDevis::class, 'produit_id');
     }
 
-    public function DetailsProformat()
+    public function detailsProformat()
     {
         return $this->hasMany(DetailsProformat::class, 'produit_id');
     }
