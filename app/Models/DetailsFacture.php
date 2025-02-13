@@ -14,6 +14,7 @@ class DetailsFacture extends Model
     protected $fillable = [
         'facture_id',
         'produit_id',
+        'quantite',
         'tva',
 
     ];

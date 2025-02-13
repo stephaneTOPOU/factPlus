@@ -77,6 +77,7 @@ class ProformatController extends Controller
             $detailProformat = new DetailsProformat();
             $detailProformat->proformat_id = $proformat->id;
             $detailProformat->produit_id = $request->produit_id;
+            $detailProformat->quantite = $request->quantite;
             $detailProformat->tva = $request->tva;
             $detailProformat->save();
 
@@ -175,6 +176,7 @@ class ProformatController extends Controller
             // Trouver le détail du proformat ou lever une exception si introuvable
             $detailProformat = DetailsProformat::where('proformat_id', $proformats)->firstOrFail();
             $detailProformat->produit_id = $request->produit_id;
+            $detailProformat->quantite = $request->quantite;
             $detailProformat->tva = $request->tva;
             $detailProformat->save();
 

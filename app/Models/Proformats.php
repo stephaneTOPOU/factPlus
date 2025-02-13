@@ -48,23 +48,19 @@ class Proformats extends Model
     public function montantHT()
     {
         return $this->detailProformat->sum(function ($detail) {
-            return $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
+            return $detail->quantite * $detail->produit->prix_unitaire;
         });
     }
 
     public function tva()
     {
         return $this->detailProformat->sum(function ($detail) {
-            $montantHT = $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
-            return ($montantHT * $detail->tva) / 100;
+            return ($detail->quantite * $detail->produit->prix_unitaire * $detail->tva) / 100;
         });
     }
 
     public function total()
     {
-        return $this->detailProformat->sum(function ($detail) {
-            $montantHT = $detail->produit->quantite_stock * $detail->produit->prix_unitaire;
-            return $montantHT + ($montantHT * $detail->tva / 100);
-        });
+        return $this->montantHT() + $this->tva();
     }
 }

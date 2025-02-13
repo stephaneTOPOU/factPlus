@@ -229,34 +229,73 @@
                                 <div class="transactions-list">
                                     <div class="t-item">
                                         <div class="t-company-name">
-                                            <div class="t-icon">
-                                                <div class="icon">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                                        height="24" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round" class="feather feather-home">
-                                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                                                    </svg>
+                                            @if ($transaction->facture->client->type_client == 'Entreprise')
+                                                <div class="t-icon">
+                                                    <div class="icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                            height="24" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round"
+                                                            class="feather feather-home">
+                                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z">
+                                                            </path>
+                                                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                                        </svg>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            @else
+                                                <div class="t-icon">
+                                                    <div class="avatar avatar-xl">
+                                                        <span class="avatar-title rounded-circle">
+                                                            @php
+                                                                $nomComplet =
+                                                                    $transaction->facture->client->nom .
+                                                                    ' ' .
+                                                                    $transaction->facture->client->prenom;
+                                                                $parties = explode(' ', $nomComplet);
+                                                                $initiales = '';
+
+                                                                foreach ($parties as $partie) {
+                                                                    $initiales .= strtoupper(substr($partie, 0, 1));
+                                                                }
+
+                                                                echo $initiales;
+                                                            @endphp
+
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            @endif
+
                                             <div class="t-name">
-                                                <h4>{{ $transaction->facture->client->nom }}</h4>
+                                                <h4>{{ $transaction->facture->client->nom }}
+                                                    {{ $transaction->facture->client->prenom }}</h4>
                                                 <p class="meta-date">{{ $transaction->date_paiement }}</p>
                                             </div>
-
                                         </div>
-                                        <div class="t-rate rate-dec">
-                                            <p><span>{{ $transaction->facture->total() }}</span> <svg
-                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    class="feather feather-arrow-down">
-                                                    <line x1="12" y1="5" x2="12"
-                                                        y2="19">
-                                                    </line>
-                                                    <polyline points="19 12 12 19 5 12"></polyline>
-                                                </svg></p>
+                                        <div class="t-rate rate-inc">
+                                            @if ($transaction->facture->total() > 500.0)
+                                                <p><span>{{ $transaction->facture->total() }}</span> <svg
+                                                        xmlns="http://www.w3.org/2000/svg" width="24"
+                                                        height="24" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" class="feather feather-arrow-up">
+                                                        <line x1="12" y1="19" x2="12"
+                                                            y2="5"></line>
+                                                        <polyline points="5 12 12 5 19 12"></polyline>
+                                                    </svg></p>
+                                            @else
+                                                <p><span>{{ $transaction->facture->total() }}</span> <svg
+                                                        xmlns="http://www.w3.org/2000/svg" width="24"
+                                                        height="24" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" class="feather feather-arrow-down">
+                                                        <line x1="12" y1="5" x2="12"
+                                                            y2="19">
+                                                        </line>
+                                                        <polyline points="19 12 12 19 5 12"></polyline>
+                                                    </svg></p>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -460,7 +499,7 @@
                     <div class="widget widget-table-two">
 
                         <div class="widget-heading">
-                            <h5 class="">Recent Orders</h5>
+                            <h5 class="">Commandes récentes</h5>
                         </div>
 
                         <div class="widget-content">
@@ -469,16 +508,16 @@
                                     <thead>
                                         <tr>
                                             <th>
-                                                <div class="th-content">Customer</div>
+                                                <div class="th-content">Client</div>
                                             </th>
                                             <th>
-                                                <div class="th-content">Product</div>
+                                                <div class="th-content">Produit</div>
                                             </th>
                                             <th>
-                                                <div class="th-content">Invoice</div>
+                                                <div class="th-content">Facture</div>
                                             </th>
                                             <th>
-                                                <div class="th-content th-heading">Price</div>
+                                                <div class="th-content th-heading">Prix</div>
                                             </th>
                                             <th>
                                                 <div class="th-content">Status</div>
@@ -486,153 +525,47 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content customer-name"><img
-                                                        src="{{ asset('assets/img/profile-7.jpg') }}"
-                                                        alt="avatar">Andy King</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content product-brand">Nike Sport</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">#76894</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content pricing"><span class="">$88.00</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span
-                                                        class="badge outline-badge-primary">Shipped</span></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content customer-name"><img
-                                                        src="{{ asset('assets/img/profile-4.jpg') }}"
-                                                        alt="avatar">Irene Collins</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content product-brand">Speakers</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">#75844</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content pricing"><span class="">$84.00</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span
-                                                        class="badge outline-badge-success">Paid</span></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content customer-name"><img
-                                                        src="{{ asset('assets/img/profile-10.jpg') }}"
-                                                        alt="avatar">Laurie Fox</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content product-brand">Camera</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">#66894</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content pricing"><span class="">$126.04</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span
-                                                        class="badge outline-badge-danger">Pending</span></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content customer-name"><img
-                                                        src="{{ asset('assets/img/profile-13.jpg') }}"
-                                                        alt="avatar">Luke Ivory</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content product-brand">Headphone</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">#46894</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content pricing"><span class="">$56.07</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span
-                                                        class="badge outline-badge-success">Paid</span></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content customer-name"><img
-                                                        src="{{ asset('assets/img/profile-5.jpg') }}"
-                                                        alt="avatar">Ryan Collins</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content product-brand">Sport</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">#89891</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content pricing"><span class="">$108.09</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span
-                                                        class="badge outline-badge-primary">Shipped</span></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content customer-name"><img
-                                                        src="{{ asset('assets/img/profile-6.jpg') }}"
-                                                        alt="avatar">Nia Hillyer</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content product-brand">Sunglasses</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">#26974</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content pricing"><span class="">$168.09</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span
-                                                        class="badge outline-badge-primary">Shipped</span></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content customer-name"><img
-                                                        src="{{ asset('assets/img/profile-11.jpg') }}"
-                                                        alt="avatar">Sonia Shaw</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content product-brand">Watch</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">#76844</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content pricing"><span class="">$110.00</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span
-                                                        class="badge outline-badge-success">Paid</span></div>
-                                            </td>
-                                        </tr>
+                                        @foreach ($orders as $order)
+                                            <tr>
+                                                <td>
+                                                    <div class="td-content customer-name"><img
+                                                            src="{{ asset('assets/img/profile-7.jpg') }}"
+                                                            alt="avatar">{{ $order->client->nom }}
+                                                        {{ $order->client->prenom }}</div>
+                                                </td>
+                                                @foreach ($order->detailsFacture as $detail)
+                                                    <td>
+                                                        <div class="td-content product-brand">
+                                                            {{ $detail->produit->nom }}</div>
+                                                    </td>
+                                                @endforeach
+                                                <td>
+                                                    <div class="td-content">#{{ $order->reference_facture }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="td-content pricing"><span
+                                                            class="">{{ $order->total() }}</span>
+                                                    </div>
+                                                </td>
+                                                @if ($order->status == 'payée')
+                                                    <td>
+                                                        <div class="td-content"><span
+                                                                class="badge outline-badge-success">Payée</span></div>
+                                                    </td>
+                                                @elseif ($order->status == 'en attente')
+                                                    <td>
+                                                        <div class="td-content"><span
+                                                                class="badge outline-badge-primary">En attente</span>
+                                                        </div>
+                                                    </td>
+                                                @else
+                                                    <td>
+                                                        <div class="td-content"><span
+                                                                class="badge outline-badge-danger">Annulée</span></div>
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -644,7 +577,7 @@
                     <div class="widget widget-table-three">
 
                         <div class="widget-heading">
-                            <h5 class="">Top Selling Product</h5>
+                            <h5 class="">Produit le plus vendu</h5>
                         </div>
 
                         <div class="widget-content">
@@ -653,19 +586,19 @@
                                     <thead>
                                         <tr>
                                             <th>
-                                                <div class="th-content">Product</div>
+                                                <div class="th-content">Poduitr</div>
                                             </th>
                                             <th>
-                                                <div class="th-content th-heading">Price</div>
+                                                <div class="th-content">Catégorie</div>
                                             </th>
                                             <th>
-                                                <div class="th-content th-heading">Discount</div>
+                                                <div class="th-content th-heading">Quantiét</div>
                                             </th>
                                             <th>
-                                                <div class="th-content">Sold</div>
+                                                <div class="th-content th-heading">Prix unitaire</div>
                                             </th>
                                             <th>
-                                                <div class="th-content">Source</div>
+                                                <div class="th-content">Total</div>
                                             </th>
                                         </tr>
                                     </thead>
@@ -689,133 +622,6 @@
                                             <td>
                                                 <div class="td-content"><a href="javascript:void(0);"
                                                         class="">Direct</a></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content product-name"><img
-                                                        src="{{ asset('assets/img/sunglass.jpg') }}"
-                                                        alt="product">Sunglasses</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="pricing">$56.07</span></div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="discount-pricing">$5.07</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">190</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><a href="javascript:void(0);"
-                                                        class="">Google</a></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content product-name"><img
-                                                        src="{{ asset('assets/img/watch.jpg') }}"
-                                                        alt="product">Watch
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="pricing">$88.00</span></div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="discount-pricing">$20.00</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">66</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><a href="javascript:void(0);"
-                                                        class="">Ads</a></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content product-name"><img
-                                                        src="{{ asset('assets/img/laptop.jpg') }}"
-                                                        alt="product">Laptop</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="pricing">$110.00</span></div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="discount-pricing">$33.00</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">35</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><a href="javascript:void(0);"
-                                                        class="">Email</a></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content product-name"><img
-                                                        src="{{ asset('assets/img/camera.jpg') }}"
-                                                        alt="product">Camera</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="pricing">$126.04</span></div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="discount-pricing">$26.04</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">30</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><a href="javascript:void(0);"
-                                                        class="">Referral</a></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content product-name"><img
-                                                        src="{{ asset('assets/img/shoes.jpg') }}"
-                                                        alt="product">Shoes</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="pricing">$108.09</span></div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="discount-pricing">$47.09</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">130</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><a href="javascript:void(0);"
-                                                        class="">Google</a></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="td-content product-name"><img
-                                                        src="{{ asset('assets/img/headphones.jpg') }}"
-                                                        alt="product">Headphone</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="pricing">$168.09</span></div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><span class="discount-pricing">$60.09</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content">170</div>
-                                            </td>
-                                            <td>
-                                                <div class="td-content"><a href="javascript:void(0);"
-                                                        class="">Ads</a></div>
                                             </td>
                                         </tr>
                                     </tbody>

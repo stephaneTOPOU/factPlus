@@ -172,6 +172,15 @@
                                     </script>
 
                                     <div class="form-group row  mb-4">
+                                        <label for="quantite"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control form-control-sm" id="quantite"
+                                                placeholder="Quantité" name="quantite" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
                                         <label for="tva"
                                             class="col-sm-2 col-form-label col-form-label-sm">TVA</label>
                                         <div class="col-sm-10">

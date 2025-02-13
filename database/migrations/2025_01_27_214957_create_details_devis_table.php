@@ -17,6 +17,7 @@ class CreateDetailsDevisTable extends Migration
             $table->id();
             $table->bigInteger('devis_id')->unsigned();
             $table->bigInteger('produit_id')->unsigned();
+            $table->integer('quantite')->nullable();
             $table->float('tva')->nullable();
             $table->foreign('devis_id')->references('id')->on('devis')->onDelete('cascade');
             $table->foreign('produit_id')->references('id')->on('produits')->onDelete('cascade');

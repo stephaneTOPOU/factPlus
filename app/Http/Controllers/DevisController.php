@@ -77,6 +77,7 @@ class DevisController extends Controller
             $detailDevis = new DetailsDevis();
             $detailDevis->devis_id = $devis->id;
             $detailDevis->produit_id = $request->produit_id;
+            $detailDevis->quantite = $request->quantite;
             $detailDevis->tva = $request->tva;
             $detailDevis->save();
 
@@ -164,6 +165,7 @@ class DevisController extends Controller
             // Trouver le détail du devis
             $detail = DetailsDevis::where('devis_id', $devi->id)->firstOrFail();
             $detail->produit_id = $request->produit_id;
+            $detail->quantite = $request->quantite;
             $detail->tva = $request->tva;
             $detail->save();
 

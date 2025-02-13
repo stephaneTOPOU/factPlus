@@ -77,6 +77,7 @@ class FactureController extends Controller
             $detailFacture = new DetailsFacture();
             $detailFacture->facture_id = $facture->id;
             $detailFacture->produit_id = $request->produit_id;
+            $detailFacture->quantite = $request->quantite;
             $detailFacture->tva = $request->tva;
             $detailFacture->save();
 
@@ -163,6 +164,7 @@ class FactureController extends Controller
             // Trouver le détail de la facture ou lever une exception si introuvable
             $detailFacture = DetailsFacture::where('facture_id', $factures)->firstOrFail();
             $detailFacture->produit_id = $request->produit_id;
+            $detailFacture->quantite = $request->quantite;
             $detailFacture->tva = $request->tva;
             $detailFacture->save();
 

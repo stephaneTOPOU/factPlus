@@ -17,6 +17,7 @@ class CreateDetailsProformatsTable extends Migration
             $table->id();
             $table->bigInteger('proformat_id')->unsigned();
             $table->bigInteger('produit_id')->unsigned();
+            $table->integer('quantite')->nullable();
             $table->float('tva')->nullable();
             $table->foreign('proformat_id')->references('id')->on('proformats')->onDelete('cascade');
             $table->foreign('produit_id')->references('id')->on('produits')->onDelete('cascade');

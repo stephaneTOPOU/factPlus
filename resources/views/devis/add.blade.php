@@ -42,8 +42,8 @@
                                 </div>
                             </div>
                             <div class="widget-content widget-content-area">
-                                <form method="POST" action="{{ route('devis.store') }}"
-                                    enctype="multipart/form-data" id="client-form">
+                                <form method="POST" action="{{ route('devis.store') }}" enctype="multipart/form-data"
+                                    id="client-form">
                                     @csrf
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <div class="form-group row  mb-4">
@@ -172,12 +172,20 @@
                                     </script>
 
                                     <div class="form-group row  mb-4">
+                                        <label for="quantite"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control form-control-sm" id="quantite"
+                                                placeholder="Quantité" name="quantite" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row  mb-4">
                                         <label for="tva"
                                             class="col-sm-2 col-form-label col-form-label-sm">TVA</label>
                                         <div class="col-sm-10">
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="tva" placeholder="TVA"
-                                                name="tva" required>
+                                            <input type="number" class="form-control form-control-sm" id="tva"
+                                                placeholder="TVA" name="tva" required>
                                         </div>
                                     </div>
 
