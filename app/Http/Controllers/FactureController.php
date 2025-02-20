@@ -45,16 +45,27 @@ class FactureController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'client_id' => 'required|integer|exists:clients,id',
-            'date_emission' => 'required|date',
-            'date_echeance' => 'required|date|after_or_equal:date_emission',
-            'status' => 'required|string|in:en attente,payée,annulée',
-            'produits' => 'required|array|min:1',
-            'produits.*.produit_id' => 'required|integer|exists:produits,id',
-            'produits.*.quantite' => 'required|integer|min:1',
-            'produits.*.tva' => 'required|numeric|min:0',
-        ]);
+        try {
+            $validated = $request->validate([
+                'client_id' => 'required|integer|exists:clients,id',
+                'date_emission' => 'required|date',
+                'date_echeance' => 'required|date|after_or_equal:date_emission',
+                'status' => 'required|string|in:en attente,payée,annulée',
+                'produits' => 'required|array|min:1',
+                'produits.*.produit_id' => 'required|integer|exists:produits,id',
+                'produits.*.quantite' => 'required|integer|min:1',
+                'produits.*.tva' => 'required|numeric|min:0',
+
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+        dd($request->all());
+
 
         try {
             DB::beginTransaction();
@@ -66,12 +77,14 @@ class FactureController extends Controller
                 'date_emission' => $validated['date_emission'],
                 'date_echeance' => $validated['date_echeance'],
                 'status' => $validated['status']
-            ]);
+            ]);//dd($facture);
 
             Log::info('Facture créée avec succès', ['facture_id' => $facture->id]);
 
             foreach ($validated['produits'] as $produitData) {
-                $produit = Produits::findOrFail($produitData['produit_id']);
+                $produit = Produits::where('id', $produitData['produit_id'])
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
                 if ($produit->quantite_stock < $produitData['quantite']) {
                     return response()->json([
@@ -80,29 +93,35 @@ class FactureController extends Controller
                     ], 400);
                 }
 
+                // Création du détail de la facture
                 DetailsFacture::create([
                     'facture_id' => $facture->id,
                     'produit_id' => $produitData['produit_id'],
                     'quantite' => $produitData['quantite'],
-                    'tva' => $produitData['tva']
+                    'tva' => $produitData['tva'],
+
                 ]);
 
                 // Mise à jour du stock
                 $produit->decrement('quantite_stock', $produitData['quantite']);
             }
 
+            // Mise à jour automatique du montant total via le modèle
+            $facture->total(); // ✅ Appel d'une méthode dans le modèle
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Facture ajoutée avec succès',
-                'facture' => $facture->load('details')
+                'facture' => $facture->load('details'),
             ], 200);
         } catch (Exception $e) {
             DB::rollBack();
 
             Log::error('Erreur lors de la création de la facture', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
             ]);
 
@@ -112,6 +131,8 @@ class FactureController extends Controller
             ], 500);
         }
     }
+
+
 
 
     /**

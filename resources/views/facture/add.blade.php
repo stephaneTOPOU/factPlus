@@ -12,7 +12,7 @@
 <link href="{{ asset('assets/css/components/custom-sweetalert.css') }}" rel="stylesheet" type="text/css" />
 <!-- END THEME GLOBAL STYLES -->
 
-<link href="assets/css/components/custom-modal.css" rel="stylesheet" type="text/css" />
+<link href="{{ asset('assets/css/components/custom-modal.css') }}" rel="stylesheet" type="text/css" />
 
 @include('head.head4')
 @include('head.head5')
@@ -85,16 +85,17 @@
                                             const entrepriseInput = document.getElementById('entreprise');
 
                                             const tyField = document.getElementById('ty_field');
-                                            const tySelect = document.getElementById('type_client');
+                                            const tyInput = document.getElementById('type_client');
 
                                             const isClientSelected = this.value.trim() !== '';
 
-                                            // Gestion de l'affichage et de la validation
                                             entrepriseField.style.display = isClientSelected ? 'flex' : 'none';
-                                            entrepriseInput.toggleAttribute('required', isClientSelected);
-
                                             tyField.style.display = isClientSelected ? 'flex' : 'none';
-                                            tySelect.toggleAttribute('required', isClientSelected);
+
+                                            if (!isClientSelected) {
+                                                entrepriseInput.value = '';
+                                                tyInput.value = '';
+                                            }
                                         });
                                     </script>
 
@@ -170,9 +171,11 @@
                                                 const fieldElement = document.getElementById(field);
                                                 const inputElement = document.getElementById(input);
 
-                                                // Afficher ou masquer les champs et activer/désactiver la validation
                                                 fieldElement.style.display = isProduitSelected ? 'flex' : 'none';
-                                                inputElement.toggleAttribute('required', isProduitSelected);
+
+                                                if (!isProduitSelected) {
+                                                    inputElement.value = '';
+                                                }
                                             });
                                         });
                                     </script>
@@ -221,15 +224,44 @@
                                         </script>
                                     </div>
 
-                                    <div class="form-group row  mb-4">
-                                        <label for="date_echeance"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Date d'échéance</label>
+                                    <div class="form-group row mb-4">
+                                        <label for="date_echeance" class="col-sm-2 col-form-label col-form-label-sm">Date d'échéance</label>
                                         <div class="col-sm-10">
                                             <input type="date" class="form-control form-control-sm"
                                                 id="date_echeance" placeholder="Date d'échéance" name="date_echeance"
                                                 required>
+                                            <small id="date_error" class="text-danger" style="display: none;">
+                                                La date d'échéance ne peut pas être antérieure à la date d'émission.
+                                            </small>
                                         </div>
                                     </div>
+
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const dateEmission = document.getElementById('date_emission');
+                                            const dateEcheance = document.getElementById('date_echeance');
+                                            const dateError = document.getElementById('date_error');
+
+                                            if (dateEmission && dateEcheance) {
+                                                dateEmission.addEventListener('change', function () {
+                                                    dateEcheance.setAttribute('min', this.value);
+                                                    checkDate();
+                                                });
+
+                                                dateEcheance.addEventListener('change', checkDate);
+                                            }
+
+                                            function checkDate() {
+                                                if (dateEmission.value && dateEcheance.value < dateEmission.value) {
+                                                    dateError.style.display = "block"; // Afficher le message d'erreur
+                                                    dateEcheance.value = ""; // Réinitialiser la valeur incorrecte
+                                                } else {
+                                                    dateError.style.display = "none"; // Cacher le message d'erreur
+                                                }
+                                            }
+                                        });
+                                    </script>
+
 
                                     <div class="form-group row  mb-4">
                                         <label for="status"
@@ -274,10 +306,10 @@
 
                     <form id="produitForm">
                         <div class="form-group row  mb-4">
-                            <label class="col-sm-2 col-form-label col-form-label-sm" for="produit2_id">Nom du
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="produit_id_modal">Nom du
                                 Produit</label>
                             <div class="col-sm-10">
-                                <select id="produit2_id" class="form-control" required>
+                                <select id="produit_id_modal" class="form-control" required name="produit_id">
                                     <option value="">Choisir un produit</option>
                                     @foreach ($produits as $produit)
                                         <option value="{{ $produit->id }}">
@@ -288,17 +320,17 @@
                         </div>
 
                         <div class="form-group row  mb-4">
-                            <label class="col-sm-2 col-form-label col-form-label-sm" for="quantite2">Quantité</label>
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="quantite_modal">Quantité</label>
                             <div class="col-sm-10">
-                                <input type="number" id="quantite2" class="form-control" required min="1">
+                                <input type="number" id="quantite_modal" class="form-control" required min="1" name="quantite">
                             </div>
                         </div>
 
                         <div class="form-group row  mb-4">
-                            <label class="col-sm-2 col-form-label col-form-label-sm" for="tva2">TVA (%)</label>
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="tva_modal">TVA (%)</label>
                             <div class="col-sm-10">
-                                <input type="number" id="tva2" class="form-control" required min="0"
-                                    step="0.01">
+                                <input type="number" id="tva_modal" class="form-control" required min="0"
+                                    step="0.01" name="tva">
                             </div>
                         </div>
                     </form>
@@ -318,23 +350,25 @@
 <script>
     let produitIndex = 0;
 
-    // Fonction pour ajouter un produit à la liste
     document.getElementById('addProduitBtn').addEventListener('click', function() {
-        // Récupérer les valeurs du formulaire modal
-        const produitId = document.getElementById('produit2_id').value;
-        const quantite = document.getElementById('quantite2').value;
-        const tva = document.getElementById('tva2').value;
+        const produitId = document.getElementById('produit_id_modal').value;
+        const quantite = document.getElementById('quantite_modal').value;
+        const tva = document.getElementById('tva_modal').value;
 
         // Vérifier que toutes les informations sont remplies
         if (produitId && quantite && tva) {
-            // Créer un nouvel élément pour afficher le produit ajouté
             const produitsContainer = document.getElementById('produits');
+
+            // Récupération du nom du produit sélectionné
+            const produitNom = document.querySelector(`#produit_id_modal option[value="${produitId}"]`).text;
+
+            // Création de l'élément produit
             const newProduitItem = document.createElement('div');
             newProduitItem.classList.add('form-group', 'row', 'mb-4', 'produit-item');
             newProduitItem.innerHTML = `
                 <div class="col-md-4">
-                    <input type="text" name="produits[${produitIndex}][produit_id]" value="${produitId}" hidden>
-                    <span>${document.querySelector(`#produit_id option[value="${produitId}"]`).text}</span>
+                    <input type="hidden" name="produits[${produitIndex}][produit_id]" value="${produitId}">
+                    <span>${produitNom}</span>
                 </div>
                 <div class="col-md-3">
                     <input type="text" name="produits[${produitIndex}][quantite]" value="${quantite}" class="form-control" readonly>
@@ -343,27 +377,32 @@
                     <input type="text" name="produits[${produitIndex}][tva]" value="${tva}" class="form-control" readonly>
                 </div>
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-danger remove-produit" onclick="removeProduit(this)">Supprimer</button>
+                    <button type="button" class="btn btn-danger remove-produit">Supprimer</button>
                 </div>
             `;
+
+            // Ajouter le produit à la liste
             produitsContainer.appendChild(newProduitItem);
 
-            // Réinitialiser le formulaire modal
+            // Ajouter un événement pour supprimer l'élément
+            newProduitItem.querySelector('.remove-produit').addEventListener('click', function() {
+                this.closest('.produit-item').remove();
+            });
+
+            // Réinitialiser les champs du modal
             document.getElementById('produitForm').reset();
 
             // Fermer le modal
             $('#addProduitModal').modal('hide');
+
+            // Incrémenter l'index pour le prochain produit
             produitIndex++;
         } else {
             alert('Veuillez remplir tous les champs.');
         }
     });
-
-    // Fonction pour supprimer un produit
-    function removeProduit(button) {
-        button.closest('.produit-item').remove();
-    }
 </script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
