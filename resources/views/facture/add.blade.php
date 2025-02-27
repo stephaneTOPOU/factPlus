@@ -225,7 +225,8 @@
                                     </div>
 
                                     <div class="form-group row mb-4">
-                                        <label for="date_echeance" class="col-sm-2 col-form-label col-form-label-sm">Date d'échéance</label>
+                                        <label for="date_echeance"
+                                            class="col-sm-2 col-form-label col-form-label-sm">Date d'échéance</label>
                                         <div class="col-sm-10">
                                             <input type="date" class="form-control form-control-sm"
                                                 id="date_echeance" placeholder="Date d'échéance" name="date_echeance"
@@ -234,34 +235,32 @@
                                                 La date d'échéance ne peut pas être antérieure à la date d'émission.
                                             </small>
                                         </div>
-                                    </div>
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                const dateEmission = document.getElementById('date_emission');
+                                                const dateEcheance = document.getElementById('date_echeance');
+                                                const dateError = document.getElementById('date_error');
 
-                                    <script>
-                                        document.addEventListener('DOMContentLoaded', function () {
-                                            const dateEmission = document.getElementById('date_emission');
-                                            const dateEcheance = document.getElementById('date_echeance');
-                                            const dateError = document.getElementById('date_error');
+                                                if (dateEmission && dateEcheance) {
+                                                    dateEmission.addEventListener('change', function() {
+                                                        dateEcheance.setAttribute('min', this.value);
+                                                        checkDate();
+                                                    });
 
-                                            if (dateEmission && dateEcheance) {
-                                                dateEmission.addEventListener('change', function () {
-                                                    dateEcheance.setAttribute('min', this.value);
-                                                    checkDate();
-                                                });
-
-                                                dateEcheance.addEventListener('change', checkDate);
-                                            }
-
-                                            function checkDate() {
-                                                if (dateEmission.value && dateEcheance.value < dateEmission.value) {
-                                                    dateError.style.display = "block"; // Afficher le message d'erreur
-                                                    dateEcheance.value = ""; // Réinitialiser la valeur incorrecte
-                                                } else {
-                                                    dateError.style.display = "none"; // Cacher le message d'erreur
+                                                    dateEcheance.addEventListener('change', checkDate);
                                                 }
-                                            }
-                                        });
-                                    </script>
 
+                                                function checkDate() {
+                                                    if (dateEmission.value && dateEcheance.value < dateEmission.value) {
+                                                        dateError.style.display = "block"; // Afficher le message d'erreur
+                                                        dateEcheance.value = ""; // Réinitialiser la valeur incorrecte
+                                                    } else {
+                                                        dateError.style.display = "none"; // Cacher le message d'erreur
+                                                    }
+                                                }
+                                            });
+                                        </script>
+                                    </div>
 
                                     <div class="form-group row  mb-4">
                                         <label for="status"
@@ -320,9 +319,11 @@
                         </div>
 
                         <div class="form-group row  mb-4">
-                            <label class="col-sm-2 col-form-label col-form-label-sm" for="quantite_modal">Quantité</label>
+                            <label class="col-sm-2 col-form-label col-form-label-sm"
+                                for="quantite_modal">Quantité</label>
                             <div class="col-sm-10">
-                                <input type="number" id="quantite_modal" class="form-control" required min="1" name="quantite">
+                                <input type="number" id="quantite_modal" class="form-control" required
+                                    min="1" name="quantite">
                             </div>
                         </div>
 

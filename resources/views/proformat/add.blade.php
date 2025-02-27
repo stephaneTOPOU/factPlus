@@ -224,7 +224,35 @@
                                             <input type="date" class="form-control form-control-sm"
                                                 id="date_echeance" placeholder="Date d'échéance" name="date_echeance"
                                                 required>
+                                            <small id="date_error" class="text-danger" style="display: none;">
+                                                La date d'échéance ne peut pas être antérieure à la date d'émission.
+                                            </small>
                                         </div>
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                const dateEmission = document.getElementById('date_emission');
+                                                const dateEcheance = document.getElementById('date_echeance');
+                                                const dateError = document.getElementById('date_error');
+
+                                                if (dateEmission && dateEcheance) {
+                                                    dateEmission.addEventListener('change', function() {
+                                                        dateEcheance.setAttribute('min', this.value);
+                                                        checkDate();
+                                                    });
+
+                                                    dateEcheance.addEventListener('change', checkDate);
+                                                }
+
+                                                function checkDate() {
+                                                    if (dateEmission.value && dateEcheance.value < dateEmission.value) {
+                                                        dateError.style.display = "block"; // Afficher le message d'erreur
+                                                        dateEcheance.value = ""; // Réinitialiser la valeur incorrecte
+                                                    } else {
+                                                        dateError.style.display = "none"; // Cacher le message d'erreur
+                                                    }
+                                                }
+                                            });
+                                        </script>
                                     </div>
 
                                     <div class="form-group row  mb-4">
