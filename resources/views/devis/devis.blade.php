@@ -43,8 +43,7 @@
                                     <ul class="nav nav-pills inv-list-container d-block" id="pills-tab" role="tablist">
                                         @foreach ($devis as $devi)
                                             <li class="nav-item">
-                                                <div class="nav-link list-actions"
-                                                    id="{{ $devi->reference_devis }}"
+                                                <div class="nav-link list-actions" id="{{ $devi->reference_devis }}"
                                                     data-invoice-id="{{ $devi->reference_devis }}">
                                                     <div class="f-m-body">
                                                         <div class="f-head">
@@ -163,8 +162,7 @@
                                                         <p class="inv-due-date"><span class="inv-title">Date
                                                                 d'échéance :
                                                             </span>
-                                                            <span
-                                                                class="inv-date">{{ $devi->date_echeance }}</span>
+                                                            <span class="inv-date">{{ $devi->date_echeance }}</span>
                                                         </p>
                                                     </div>
                                                 </div>
@@ -215,20 +213,17 @@
                                                                     <h6 class="inv-title">Détails du produit :
                                                                     </h6>
                                                                 </div>
-                                                                @foreach ($devi->detailDevis as $detail)
-                                                                    <div class="col-sm-4 col-12">
-                                                                        <p class="inv-subtitle">Catégorie :</p>
-                                                                    </div>
-                                                                    <div class="col-sm-8 col-12">
-                                                                        <p>{{ $detail->produit->categorie }}</p>
-                                                                    </div>
-                                                                    <div class="col-sm-4 col-12">
-                                                                        <p class="inv-subtitle">Description :</p>
-                                                                    </div>
-                                                                    <div class="col-sm-8 col-12">
-                                                                        <p>{{ $detail->description }}</p>
-                                                                    </div>
-                                                                @endforeach
+
+                                                                <div class="col-sm-4 col-12">
+                                                                    <p class="inv-subtitle">Catégorie et Description :
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col-sm-8 col-12">
+                                                                    <p>
+                                                                        {{ implode(' | ', $devi->detailDevis->map(fn($detail) => $detail->produit->categorie . '; ' . $detail->produit->description)->toArray()) }}
+                                                                    </p>
+                                                                </div>
+
                                                             </div>
                                                         </div>
                                                     </div>

@@ -215,20 +215,15 @@
                                                                     <h6 class="inv-title">Détails du produit :
                                                                     </h6>
                                                                 </div>
-                                                                @foreach ($facture->detailsFacture as $detail)
-                                                                    <div class="col-sm-4 col-12">
-                                                                        <p class="inv-subtitle">Catégorie :</p>
-                                                                    </div>
-                                                                    <div class="col-sm-8 col-12">
-                                                                        <p>{{ $detail->produit->categorie }}</p>
-                                                                    </div>
-                                                                    <div class="col-sm-4 col-12">
-                                                                        <p class="inv-subtitle">Description :</p>
-                                                                    </div>
-                                                                    <div class="col-sm-8 col-12">
-                                                                        <p>{{ $detail->description }}</p>
-                                                                    </div>
-                                                                @endforeach
+                                                                <div class="col-sm-4 col-12">
+                                                                    <p class="inv-subtitle">Catégorie et Description :
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col-sm-8 col-12">
+                                                                    <p>
+                                                                        {{ implode(' | ', $facture->detailsFacture->map(fn($detail) => $detail->produit->categorie . '; ' . $detail->produit->description)->toArray()) }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
