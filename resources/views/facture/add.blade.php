@@ -186,7 +186,36 @@
                                         <div class="col-sm-10">
                                             <input type="number" class="form-control form-control-sm" id="quantite"
                                                 placeholder="Quantite" name="quantite" required>
+                                            <small id="quantite-error" class="text-danger"></small>
                                         </div>
+                                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                                        <script>
+                                            $(document).ready(function() {
+                                                $('#quantite').on('input', function() {
+                                                    var quantite = $(this).val();
+                                                    var produitId = $('#produit_id').val(); // Assure-toi que l'ID produit est bien récupéré
+                                                    var submitBtn = $('button[type="submit"]');
+
+                                                    if (produitId) {
+                                                        $.ajax({
+                                                            url: '/produit/stock/' + produitId,
+                                                            type: 'GET',
+                                                            success: function(data) {
+                                                                if (quantite > data.stock) {
+                                                                    $('#quantite-error').text(
+                                                                        'Stock insuffisant ! Il reste seulement ' + data.stock +
+                                                                        ' unités.');
+                                                                    submitBtn.prop('disabled', true); // Désactiver le bouton
+                                                                } else {
+                                                                    $('#quantite-error').text(''); // Supprime le message d’erreur
+                                                                    submitBtn.prop('disabled', false); // Réactiver le bouton
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        </script>
                                     </div>
                                     <div class="form-group row  mb-4">
                                         <label for="tva"
@@ -324,7 +353,37 @@
                             <div class="col-sm-10">
                                 <input type="number" id="quantite_modal" class="form-control" required
                                     min="1" name="quantite">
+                                <small id="quantite-error2" class="text-danger"></small>
                             </div>
+
+                            <script>
+                                $(document).ready(function() {
+                                    $('#quantite_modal').on('input', function() {
+                                        var quantite = $(this).val();
+                                        var produitId = $('#produit_id_modal')
+                                            .val(); // Assure-toi que l'ID produit est bien récupéré
+                                        var submitBtn = $('button[type="submit"]');
+
+                                        if (produitId) {
+                                            $.ajax({
+                                                url: '/produit/stock/' + produitId,
+                                                type: 'GET',
+                                                success: function(data) {
+                                                    if (quantite > data.stock) {
+                                                        $('#quantite-error2').text(
+                                                            'Stock insuffisant ! Il reste seulement ' + data.stock +
+                                                            ' unités.');
+                                                        submitBtn.prop('disabled', true); // Désactiver le bouton
+                                                    } else {
+                                                        $('#quantite-error2').text(''); // Supprime le message d’erreur
+                                                        submitBtn.prop('disabled', false); // Réactiver le bouton
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                            </script>
                         </div>
 
                         <div class="form-group row  mb-4">

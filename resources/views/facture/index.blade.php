@@ -60,12 +60,13 @@
                                     @foreach ($factures as $facture)
                                         <tr>
                                             <td>{{ $facture->reference_facture }}</td>
-                                            <td>{{ $facture->client->entreprise }}</td>
+                                            <td>{{ optional($facture->client)->entreprise ?? 'N/A' }}</td>
                                             <td>{{ $facture->client->nom }}</td>
-                                            @foreach ($facture->detailsFacture as $detail)
-                                                <td>{{ $detail->produit->categorie }}</td>
-                                                <td>{{ $detail->produit->nom }}</td>
-                                            @endforeach
+
+                                            <td>{{ implode(', ', $facture->detailsFacture->pluck('produit.categorie')->unique()->toArray()) }}
+                                            </td>
+                                            <td>{{ implode(', ', $facture->detailsFacture->pluck('produit.nom')->toArray()) }}
+                                            </td>
 
                                             <td>{{ $facture->date_emission }}</td>
                                             <td>{{ $facture->date_echeance }}</td>
@@ -101,7 +102,8 @@
                                                                 <line x1="3" y1="21" x2="10"
                                                                     y2="14"></line>
                                                             </svg>
-                                                            Aperçu</a>
+                                                            Aperçu
+                                                        </a>
                                                         <a class="dropdown-item"
                                                             href="{{ route('facture.edit', $facture->id) }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="24"
@@ -116,12 +118,10 @@
                                                                     d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z">
                                                                 </path>
                                                             </svg>
-                                                            Modifier</a>
-
+                                                            Modifier
+                                                        </a>
                                                         <a class="dropdown-item" href="#"
-                                                            onclick="deleteData({{ $facture->id }})"
-                                                            data-id="{{ $facture->id }}"
-                                                            data-target="#default{{ $facture->id }}">
+                                                            onclick="deleteData({{ $facture->id }})">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="24"
                                                                 height="24" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -144,6 +144,7 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
+
                             </table>
                         </div>
                     </div>

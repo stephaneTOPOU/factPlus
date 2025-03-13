@@ -60,12 +60,13 @@
                                     @foreach ($devis as $devi)
                                         <tr>
                                             <td>{{ $devi->reference_devis }}</td>
-                                            <td>{{ $devi->client->entreprise }}</td>
+                                            <td>{{ optional($devi->client)->entreprise ?? 'N/A' }}</td>
                                             <td>{{ $devi->client->nom }}</td>
-                                            @foreach ($devi->detailDevis as $detail)
-                                                <td>{{ $detail->produit->categorie }}</td>
-                                                <td>{{ $detail->produit->nom }}</td>
-                                            @endforeach
+
+                                            <td>{{ implode(', ', $devi->detailDevis->pluck('produit.categorie')->unique()->toArray()) }}
+                                            </td>
+                                            <td>{{ implode(', ', $devi->detailDevis->pluck('produit.nom')->toArray()) }}
+                                            </td>
 
                                             <td>{{ $devi->date_emission }}</td>
                                             <td>{{ $devi->date_echeance }}</td>
@@ -101,7 +102,8 @@
                                                                 <line x1="3" y1="21" x2="10"
                                                                     y2="14"></line>
                                                             </svg>
-                                                            Aperçu</a>
+                                                            Aperçu
+                                                        </a>
                                                         <a class="dropdown-item"
                                                             href="{{ route('devis.edit', $devi->id) }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="24"
@@ -116,12 +118,10 @@
                                                                     d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z">
                                                                 </path>
                                                             </svg>
-                                                            Modifier</a>
-
+                                                            Modifier
+                                                        </a>
                                                         <a class="dropdown-item" href="#"
-                                                            onclick="deleteData({{ $devi->id }})"
-                                                            data-id="{{ $devi->id }}"
-                                                            data-target="#default{{ $devi->id }}">
+                                                            onclick="deleteData({{ $devi->id }})">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="24"
                                                                 height="24" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"

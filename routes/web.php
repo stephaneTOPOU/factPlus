@@ -63,3 +63,8 @@ Route::get('/api/client/{id}', function ($id) {
 Route::get('/api/produit/detail/{id}', function ($id) {
     return response()->json(Produits::findOrFail($id));
 });
+
+Route::get('/produit/stock/{id}', function ($id) {
+    $produit = Produits::find($id);
+    return response()->json(['stock' => $produit ? $produit->quantite_stock : 0]);
+});

@@ -12,6 +12,8 @@
 <link href="{{ asset('assets/css/components/custom-sweetalert.css') }}" rel="stylesheet" type="text/css" />
 <!-- END THEME GLOBAL STYLES -->
 
+<link href="{{ asset('assets/css/components/custom-modal.css') }}" rel="stylesheet" type="text/css" />
+
 @include('head.head4')
 @include('head.head5')
 
@@ -27,7 +29,6 @@
     <!--  BEGIN CONTENT AREA  -->
     <div id="content" class="main-content">
         <div class="row layout-top-spacing">
-
             <div class="container">
 
                 <div class="row">
@@ -84,31 +85,37 @@
                                             const entrepriseInput = document.getElementById('entreprise');
 
                                             const tyField = document.getElementById('ty_field');
-                                            const tySelect = document.getElementById('type_client');
+                                            const tyInput = document.getElementById('type_client');
 
                                             const isClientSelected = this.value.trim() !== '';
 
-                                            // Gestion de l'affichage et de la validation
                                             entrepriseField.style.display = isClientSelected ? 'flex' : 'none';
-                                            entrepriseInput.toggleAttribute('required', isClientSelected);
-
                                             tyField.style.display = isClientSelected ? 'flex' : 'none';
-                                            tySelect.toggleAttribute('required', isClientSelected);
+
+                                            if (!isClientSelected) {
+                                                entrepriseInput.value = '';
+                                                tyInput.value = '';
+                                            }
                                         });
                                     </script>
 
-                                    <div class="form-group row  mb-4">
-                                        <label for="produit_id" class="col-sm-2 col-form-label col-form-label-sm">Nom du
-                                            produit</label>
-                                        <div class="col-sm-10">
-                                            <select class="form-control" id="produit_id" name="produit_id">
-                                                <option value="">Choisir un produit</option>
-                                                @foreach ($produits as $produit)
-                                                    <option value="{{ $produit->id }}">{{ $produit->nom }}</option>
-                                                @endforeach
-                                            </select>
+                                    <div id="produits">
+                                        <div class="form-group row  mb-4 produit-item">
+                                            <label for="produit_id"
+                                                class="col-sm-2 col-form-label col-form-label-sm">Nom du
+                                                produit</label>
+                                            <div class="col-sm-10">
+                                                <select class="form-control" id="produit_id" name="produit_id">
+                                                    <option value="">Choisir un produit</option>
+                                                    @foreach ($produits as $produit)
+                                                        <option value="{{ $produit->id }}">{{ $produit->nom }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
+
 
                                     <div class="form-group row  mb-4" id="kt_field" style="display: none;">
                                         <label for="categorie"
@@ -121,11 +128,11 @@
 
                                     <div class="form-group row  mb-4" id="qte_field" style="display: none;">
                                         <label for="quantite_stock"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
+                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité en stock</label>
                                         <div class="col-sm-10">
                                             <input type="number" class="form-control form-control-sm"
-                                                id="quantite_stock" placeholder="Quantité" name="quantite_stock"
-                                                required readonly>
+                                                id="quantite_stock" placeholder="Quantité en stock"
+                                                name="quantite_stock" required readonly>
                                         </div>
                                     </div>
 
@@ -164,22 +171,52 @@
                                                 const fieldElement = document.getElementById(field);
                                                 const inputElement = document.getElementById(input);
 
-                                                // Afficher ou masquer les champs et activer/désactiver la validation
                                                 fieldElement.style.display = isProduitSelected ? 'flex' : 'none';
-                                                inputElement.toggleAttribute('required', isProduitSelected);
+
+                                                if (!isProduitSelected) {
+                                                    inputElement.value = '';
+                                                }
                                             });
                                         });
                                     </script>
 
                                     <div class="form-group row  mb-4">
                                         <label for="quantite"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
+                                            class="col-sm-2 col-form-label col-form-label-sm">Quantite</label>
                                         <div class="col-sm-10">
                                             <input type="number" class="form-control form-control-sm" id="quantite"
-                                                placeholder="Quantité" name="quantite" required>
+                                                placeholder="Quantite" name="quantite" required>
+                                            <small id="quantite-error" class="text-danger"></small>
                                         </div>
-                                    </div>
+                                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                                        <script>
+                                            $(document).ready(function() {
+                                                $('#quantite').on('input', function() {
+                                                    var quantite = $(this).val();
+                                                    var produitId = $('#produit_id').val(); // Assure-toi que l'ID produit est bien récupéré
+                                                    var submitBtn = $('button[type="submit"]');
 
+                                                    if (produitId) {
+                                                        $.ajax({
+                                                            url: '/produit/stock/' + produitId,
+                                                            type: 'GET',
+                                                            success: function(data) {
+                                                                if (quantite > data.stock) {
+                                                                    $('#quantite-error').text(
+                                                                        'Stock insuffisant ! Il reste seulement ' + data.stock +
+                                                                        ' unités.');
+                                                                    submitBtn.prop('disabled', true); // Désactiver le bouton
+                                                                } else {
+                                                                    $('#quantite-error').text(''); // Supprime le message d’erreur
+                                                                    submitBtn.prop('disabled', false); // Réactiver le bouton
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        </script>
+                                    </div>
                                     <div class="form-group row  mb-4">
                                         <label for="tva"
                                             class="col-sm-2 col-form-label col-form-label-sm">TVA</label>
@@ -216,7 +253,7 @@
                                         </script>
                                     </div>
 
-                                    <div class="form-group row  mb-4">
+                                    <div class="form-group row mb-4">
                                         <label for="date_echeance"
                                             class="col-sm-2 col-form-label col-form-label-sm">Date d'échéance</label>
                                         <div class="col-sm-10">
@@ -267,6 +304,11 @@
                                         </div>
                                     </div>
 
+                                    <!-- Bouton pour ajouter d'autres produits -->
+                                    <input type="button" id="addProduit" class="btn btn-secondary"
+                                        value="Ajouter un autre produit" data-toggle="modal"
+                                        data-target=".bd-example-modal-lg" />
+
                                     <input type="submit" name="time" required class="btn btn-primary"
                                         value="Ajouter">
                                 </form>
@@ -276,18 +318,151 @@
                 </div>
 
             </div>
-
         </div>
-
     </div>
-</div>
-</div>
-<!--  END CONTENT AREA  -->
-</div>
-<!-- END MAIN CONTAINER -->
 
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Ajouter un nouveau
+                        produit</h5>
+
+                </div>
+                <div class="modal-body">
+
+                    <form id="produitForm">
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="produit_id_modal">Nom du
+                                Produit</label>
+                            <div class="col-sm-10">
+                                <select id="produit_id_modal" class="form-control" required name="produit_id">
+                                    <option value="">Choisir un produit</option>
+                                    @foreach ($produits as $produit)
+                                        <option value="{{ $produit->id }}">
+                                            {{ $produit->nom }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm"
+                                for="quantite_modal">Quantité</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="quantite_modal" class="form-control" required
+                                    min="1" name="quantite">
+                                <small id="quantite-error2" class="text-danger"></small>
+                            </div>
+
+                            <script>
+                                $(document).ready(function() {
+                                    $('#quantite_modal').on('input', function() {
+                                        var quantite = $(this).val();
+                                        var produitId = $('#produit_id_modal')
+                                            .val(); // Assure-toi que l'ID produit est bien récupéré
+                                        var submitBtn = $('button[type="submit"]');
+
+                                        if (produitId) {
+                                            $.ajax({
+                                                url: '/produit/stock/' + produitId,
+                                                type: 'GET',
+                                                success: function(data) {
+                                                    if (quantite > data.stock) {
+                                                        $('#quantite-error2').text(
+                                                            'Stock insuffisant ! Il reste seulement ' + data.stock +
+                                                            ' unités.');
+                                                        submitBtn.prop('disabled', true); // Désactiver le bouton
+                                                    } else {
+                                                        $('#quantite-error2').text(''); // Supprime le message d’erreur
+                                                        submitBtn.prop('disabled', false); // Réactiver le bouton
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                            </script>
+                        </div>
+
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="tva_modal">TVA (%)</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="tva_modal" class="form-control" required min="0"
+                                    step="0.01" name="tva">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Fermer</button>
+                    <button type="button" class="btn btn-primary" id="addProduitBtn">Ajouter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 @include('Footer.footer')
+
+<script>
+    let produitIndex = 0;
+
+    document.getElementById('addProduitBtn').addEventListener('click', function() {
+        const produitId = document.getElementById('produit_id_modal').value;
+        const quantite = document.getElementById('quantite_modal').value;
+        const tva = document.getElementById('tva_modal').value;
+
+        // Vérifier que toutes les informations sont remplies
+        if (produitId && quantite && tva) {
+            const produitsContainer = document.getElementById('produits');
+
+            // Récupération du nom du produit sélectionné
+            const produitNom = document.querySelector(`#produit_id_modal option[value="${produitId}"]`).text;
+
+            // Création de l'élément produit
+            const newProduitItem = document.createElement('div');
+            newProduitItem.classList.add('form-group', 'row', 'mb-4', 'produit-item');
+            newProduitItem.innerHTML = `
+                <div class="col-md-4">
+                    <input type="hidden" name="produits[${produitIndex}][produit_id]" value="${produitId}">
+                    <span>${produitNom}</span>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="produits[${produitIndex}][quantite]" value="${quantite}" class="form-control" readonly>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="produits[${produitIndex}][tva]" value="${tva}" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger remove-produit">Supprimer</button>
+                </div>
+            `;
+
+            // Ajouter le produit à la liste
+            produitsContainer.appendChild(newProduitItem);
+
+            // Ajouter un événement pour supprimer l'élément
+            newProduitItem.querySelector('.remove-produit').addEventListener('click', function() {
+                this.closest('.produit-item').remove();
+            });
+
+            // Réinitialiser les champs du modal
+            document.getElementById('produitForm').reset();
+
+            // Fermer le modal
+            $('#addProduitModal').modal('hide');
+
+            // Incrémenter l'index pour le prochain produit
+            produitIndex++;
+        } else {
+            alert('Veuillez remplir tous les champs.');
+        }
+    });
+</script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>

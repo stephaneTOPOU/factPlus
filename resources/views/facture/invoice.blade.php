@@ -192,13 +192,12 @@
                                                                             <td>{{ $facture->reference_facture }}</td>
                                                                             <td>{{ $detail->produit->nom }}</td>
                                                                             <td class="text-right">
-                                                                                {{ $detail->produit->quantite_stock }}
+                                                                                {{ $detail->quantite }}</td>
+                                                                            <td class="text-right">
+                                                                                {{ number_format($detail->produit->prix_unitaire, 2, '.', ' ') }}
                                                                             </td>
                                                                             <td class="text-right">
-                                                                                {{ $detail->produit->prix_unitaire }}
-                                                                            </td>
-                                                                            <td class="text-right">
-                                                                                {{ number_format($facture->montantHT(), 2, '.', ' ') }}
+                                                                                {{ number_format($detail->quantite * $detail->produit->prix_unitaire, 2, '.', ' ') }}
                                                                             </td>
                                                                         </tr>
                                                                     @endforeach
@@ -209,69 +208,61 @@
                                                 </div>
 
                                                 <div class="row mt-4">
-                                                    @foreach ($facture->detailsFacture as $detail)
-                                                        <div class="col-sm-5 col-12 order-sm-0 order-1">
-                                                            <div class="inv--payment-info">
-                                                                <div class="row">
-                                                                    <div class="col-sm-12 col-12">
-                                                                        <h6 class=" inv-title">Informations du produit :</h6>
-                                                                    </div>
+                                                    <div class="col-sm-5 col-12 order-sm-0 order-1">
+                                                        <div class="inv--payment-info">
+                                                            <div class="row">
+                                                                <div class="col-sm-12 col-12">
+                                                                    <h6 class="inv-title">Détails du produit :
+                                                                    </h6>
+                                                                </div>
+                                                                @foreach ($facture->detailsFacture as $detail)
                                                                     <div class="col-sm-4 col-12">
-                                                                        <p class=" inv-subtitle">Catégorie : </p>
+                                                                        <p class="inv-subtitle">Catégorie :</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-12">
-                                                                        <p class="">{{ $detail->produit->categorie }}</p>
+                                                                        <p>{{ $detail->produit->categorie }}</p>
                                                                     </div>
                                                                     <div class="col-sm-4 col-12">
-                                                                        <p class=" inv-subtitle">Description : </p>
+                                                                        <p class="inv-subtitle">Description :</p>
                                                                     </div>
                                                                     <div class="col-sm-8 col-12">
-                                                                        <p class="">{{ $detail->description }}</p>
+                                                                        <p>{{ $detail->description }}</p>
                                                                     </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-7 col-12 order-sm-1 order-0">
+                                                        <div class="inv--total-amounts text-sm-right">
+                                                            <div class="row">
+                                                                <div class="col-sm-8 col-7">
+                                                                    <p class="">Sous-total : </p>
+                                                                </div>
+                                                                <div class="col-sm-4 col-5">
+                                                                    <p class="">
+                                                                        {{ number_format($facture->montantHT(), 2, '.', ' ') }}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col-sm-8 col-7">
+                                                                    <p class="">Montant de la taxe : </p>
+                                                                </div>
+                                                                <div class="col-sm-4 col-5">
+                                                                    <p class="">
+                                                                        {{ number_format($facture->tva(), 2, '.', ' ') }}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col-sm-8 col-7 grand-total-title">
+                                                                    <h4 class="">Total : </h4>
+                                                                </div>
+                                                                <div class="col-sm-4 col-5 grand-total-amount">
+                                                                    <h4 class="">
+                                                                        {{ number_format($facture->total(), 2, '.', ' ') }}
+                                                                    </h4>
                                                                 </div>
                                                             </div>
                                                         </div>
-
-                                                        <div class="col-sm-7 col-12 order-sm-1 order-0">
-                                                            <div class="inv--total-amounts text-sm-right">
-                                                                <div class="row">
-                                                                    <div class="col-sm-8 col-7">
-                                                                        <p class="">Sous-total : </p>
-                                                                    </div>
-                                                                    <div class="col-sm-4 col-5">
-                                                                        <p class="">
-                                                                            {{ number_format($facture->montantHT(), 2, '.', ' ') }}
-                                                                        </p>
-                                                                    </div>
-                                                                    <div class="col-sm-8 col-7">
-                                                                        <p class="">Montant de la taxe : </p>
-                                                                    </div>
-                                                                    <div class="col-sm-4 col-5">
-                                                                        <p class="">
-                                                                            {{ number_format($facture->tva(), 2, '.', ' ') }}
-                                                                        </p>
-                                                                    </div>
-                                                                    {{-- <div class="col-sm-8 col-7">
-                                                                        <p class=" discount-rate">Discount : <span
-                                                                                class="discount-percentage">5%</span>
-                                                                        </p>
-                                                                    </div>
-                                                                    <div class="col-sm-4 col-5">
-                                                                        <p class="">$700</p>
-                                                                    </div> --}}
-                                                                    <div class="col-sm-8 col-7 grand-total-title">
-                                                                        <h4 class="">Total : </h4>
-                                                                    </div>
-                                                                    <div class="col-sm-4 col-5 grand-total-amount">
-                                                                        <h4 class="">
-                                                                            {{ number_format($facture->total(), 2, '.', ' ') }}
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
+                                                    </div>
 
                                                 </div>
 

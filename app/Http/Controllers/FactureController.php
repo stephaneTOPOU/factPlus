@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+
+
 
 class FactureController extends Controller
 {
@@ -45,81 +48,86 @@ class FactureController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'client_id' => 'required|integer|exists:clients,id',
-                'date_emission' => 'required|date',
-                'date_echeance' => 'required|date|after_or_equal:date_emission',
-                'status' => 'required|string|in:en attente,payée,annulée',
-                'produits' => 'required|array|min:1',
-                'produits.*.produit_id' => 'required|integer|exists:produits,id',
-                'produits.*.quantite' => 'required|integer|min:1',
-                'produits.*.tva' => 'required|numeric|min:0',
+        $validator = Validator::make($request->all(), [
+            'client_id' => 'required|integer|exists:clients,id',
+            'date_emission' => 'required|date',
+            'date_echeance' => 'required|date|after_or_equal:date_emission',
+            'status' => 'required|string|in:en attente,payée,annulée',
 
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Option 1 : Enregistrement de plusieurs produits
+            'produits' => 'nullable|array',
+            'produits.*.produit_id' => 'required_with:produits|integer|exists:produits,id',
+            'produits.*.quantite' => 'required_with:produits|integer|min:1',
+            'produits.*.tva' => 'required_with:produits|numeric|min:0',
+
+            // Option 2 : Enregistrement d'un seul produit
+            'produit_id' => 'nullable|integer|exists:produits,id',
+            'quantite' => 'nullable|integer|min:1',
+            'tva' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur de validation',
-                'errors' => $e->errors(),
+                'errors' => $validator->errors(),
             ], 422);
         }
-        dd($request->all());
 
+        $validated = $validator->validated();
 
         try {
             DB::beginTransaction();
 
-            // Création de la facture
-            $facture = Factures::create([
-                'client_id' => $validated['client_id'],
-                'reference_facture' => Factures::generateReference(),
-                'date_emission' => $validated['date_emission'],
-                'date_echeance' => $validated['date_echeance'],
-                'status' => $validated['status']
-            ]);//dd($facture);
-
-            Log::info('Facture créée avec succès', ['facture_id' => $facture->id]);
-
-            foreach ($validated['produits'] as $produitData) {
-                $produit = Produits::where('id', $produitData['produit_id'])
-                    ->lockForUpdate()
-                    ->firstOrFail();
-
-                if ($produit->quantite_stock < $produitData['quantite']) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Stock insuffisant pour le produit : {$produit->nom}"
-                    ], 400);
-                }
-
-                // Création du détail de la facture
-                DetailsFacture::create([
-                    'facture_id' => $facture->id,
-                    'produit_id' => $produitData['produit_id'],
-                    'quantite' => $produitData['quantite'],
-                    'tva' => $produitData['tva'],
-
+            // Vérifier si c'est une facture complète ou juste un produit
+            if (!empty($validated['produits']) || isset($validated['produit_id'])) {
+                // Création de la facture
+                $facture = Factures::create([
+                    'client_id' => $validated['client_id'],
+                    'reference_facture' => Factures::generateReference(),
+                    'date_emission' => $validated['date_emission'],
+                    'date_echeance' => $validated['date_echeance'],
+                    'status' => $validated['status']
                 ]);
 
-                // Mise à jour du stock
-                $produit->decrement('quantite_stock', $produitData['quantite']);
+                Log::info('Facture créée avec succès', ['facture_id' => $facture->id]);
+
+                // Si plusieurs produits sont fournis
+                if (!empty($validated['produits'])) {
+                    foreach ($validated['produits'] as $produitData) {
+                        $this->ajouterProduitAFacture($facture, $produitData);
+                    }
+                }
+
+                // Si un seul produit est fourni
+                if (isset($validated['produit_id'])) {
+                    $this->ajouterProduitAFacture($facture, [
+                        'produit_id' => $validated['produit_id'],
+                        'quantite' => $validated['quantite'],
+                        'tva' => $validated['tva']
+                    ]);
+                }
+
+                // Mise à jour du total de la facture
+                $facture->total();
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Facture ajoutés avec succès',
+                    'facture' => $facture->load('detailsFacture'),
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous devez fournir au moins un produit ou plusieurs produits'
+                ], 400);
             }
-
-            // Mise à jour automatique du montant total via le modèle
-            $facture->total(); // ✅ Appel d'une méthode dans le modèle
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Facture ajoutée avec succès',
-                'facture' => $facture->load('details'),
-            ], 200);
         } catch (Exception $e) {
             DB::rollBack();
 
-            Log::error('Erreur lors de la création de la facture', [
+            Log::error('Erreur lors de l\'ajout de la facture/produit', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
@@ -127,13 +135,34 @@ class FactureController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de l\'ajout de la facture : ' . $e->getMessage()
+                'message' => 'Erreur lors de l\'ajout : ' . $e->getMessage()
             ], 500);
         }
     }
 
+    /**
+     * Fonction pour ajouter un produit à une facture
+     */
+    private function ajouterProduitAFacture($facture, $produitData)
+    {
+        $produit = Produits::where('id', $produitData['produit_id'])
+            ->lockForUpdate()
+            ->firstOrFail();
 
+        if ($produit->quantite_stock < $produitData['quantite']) {
+            throw new Exception("Stock insuffisant pour le produit : {$produit->nom}");
+        }
 
+        DetailsFacture::create([
+            'facture_id' => $facture->id,
+            'produit_id' => $produitData['produit_id'],
+            'quantite' => $produitData['quantite'],
+            'tva' => $produitData['tva'],
+        ]);
+
+        // Mise à jour du stock
+        $produit->decrement('quantite_stock', $produitData['quantite']);
+    }
 
     /**
      * Display the specified resource.
@@ -168,64 +197,118 @@ class FactureController extends Controller
      * @param  \App\Models\Factures  $factures
      * @return \Illuminate\Http\Response
      */
+
     public function update(Request $request, $factures)
     {
-        // Validation des données directement dans la requête
-        $request->validate([
-            'client_id' => 'required|integer',
-            'date_emission' => 'required|string|date',
-            'date_echeance' => 'required|string|date',
-            'status' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'client_id' => 'required|integer|exists:clients,id',
+            'date_emission' => 'required|date',
+            'date_echeance' => 'required|date|after_or_equal:date_emission',
+            'status' => 'required|string|in:en attente,payée,annulée',
+
+            // Option 1 : Enregistrement de plusieurs produits
+            'produits' => 'nullable|array',
+            'produits.*.produit_id' => 'required_with:produits|integer|exists:produits,id',
+            'produits.*.quantite' => 'required_with:produits|integer|min:1',
+            'produits.*.tva' => 'required_with:produits|numeric|min:0',
+
+            // Option 2 : Enregistrement d'un seul produit
+            'produit_id' => 'nullable|integer|exists:produits,id',
+            'quantite' => 'nullable|integer|min:1',
+            'tva' => 'nullable|numeric|min:0',
         ]);
 
-        $request->validate([
-            'produit_id' => 'required|integer',
-            'tva' => 'required|numeric',
-        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
 
         try {
-            DB::beginTransaction(); // Démarrer la transaction
+            DB::beginTransaction();
 
-            // Trouver la facture ou lever une exception si elle n'existe pas
-            $facture = Factures::findOrFail($factures);
-            $facture->client_id = $request->client_id;
-            $facture->date_emission = $request->date_emission;
-            $facture->date_echeance = $request->date_echeance;
-            $facture->status = $request->status;
-            $facture->save();
+            // Vérifier si c'est une facture complète ou juste un produit
+            if (!empty($validated['produits']) || isset($validated['produit_id'])) {
+                // Trouver la facture
+                $facture = Factures::findOrFail($factures);
 
-            Log::info('Facture mise à jour', ['facture_id' => $facture->id, 'client_id' => $facture->client_id]);
+                // Mise à jour de la facture
+                $facture->update([
+                    'client_id' => $validated['client_id'],
+                    'date_emission' => $validated['date_emission'],
+                    'date_echeance' => $validated['date_echeance'],
+                    'status' => $validated['status']
+                ]);
 
-            // Trouver le détail de la facture ou lever une exception si introuvable
-            $detailFacture = DetailsFacture::where('facture_id', $factures)->firstOrFail();
-            $detailFacture->produit_id = $request->produit_id;
-            $detailFacture->quantite = $request->quantite;
-            $detailFacture->tva = $request->tva;
-            $detailFacture->save();
+                Log::info('Facture mise à jour avec succès', ['facture_id' => $facture->id]);
 
-            Log::info('Détail de facture mis à jour', ['facture_id' => $facture->id, 'produit_id' => $detailFacture->produit_id]);
+                // Supprimer les anciens produits
+                $facture->detailsFacture()->delete();
 
-            DB::commit(); // Validation de la transaction
+                // Si plusieurs produits sont fournis
+                if (!empty($validated['produits'])) {
+                    foreach ($validated['produits'] as $produitData) {
+                        $this->ajouterProduitAFacture($facture, $produitData);
+                    }
+                }
 
-            return response()->json(['success' => true, 'message' => 'Facture mise à jour avec succès'], 200);
+                // Si un seul produit est fourni
+                if (isset($validated['produit_id'])) {
+                    $this->ajouterProduitAFacture($facture, [
+                        'produit_id' => $validated['produit_id'],
+                        'quantite' => $validated['quantite'],
+                        'tva' => $validated['tva']
+                    ]);
+                }
+
+                // Mise à jour du total de la facture
+                $facture->total();
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Facture mise à jour avec succès',
+                    'facture' => $facture->load('detailsFacture'),
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous devez fournir au moins un produit ou plusieurs produits'
+                ], 400);
+            }
         } catch (ModelNotFoundException $e) {
-            DB::rollBack(); // Annuler la transaction
-            Log::warning('Facture ou Détail non trouvé', [
+            DB::rollBack();
+
+            Log::warning('Facture introuvable', [
                 'facture_id' => $factures,
                 'error' => $e->getMessage()
             ]);
 
-            return response()->json(['success' => false, 'message' => 'Facture ou Détail de facture introuvable'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Facture introuvable'
+            ], 404);
         } catch (Exception $e) {
-            DB::rollBack(); // Annuler la transaction
-            Log::error('Erreur lors de la mise à jour de la facture', [
+            DB::rollBack();
+
+            Log::error('Erreur lors de la mise à jour de la facture/produit', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
             ]);
 
-            return response()->json(['success' => false, 'message' => 'Une erreur est survenue lors de la mise à jour de la facture'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la mise à jour : ' . $e->getMessage()
+            ], 500);
         }
     }
+
 
 
     /**

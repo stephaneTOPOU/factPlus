@@ -47,20 +47,20 @@ class Proformats extends Model
 
     public function montantHT()
     {
-        return $this->detailProformat->sum(function ($detail) {
-            return $detail->quantite * $detail->produit->prix_unitaire;
-        });
+        return $this->detailProformat->sum(
+            fn($detail) => ($detail->quantite ?? 0) * ($detail->produit->prix_unitaire ?? 0)
+        );
     }
 
     public function tva()
     {
-        return $this->detailProformat->sum(function ($detail) {
-            return ($detail->quantite * $detail->produit->prix_unitaire * $detail->tva) / 100;
-        });
+        return $this->detailProformat->sum(
+            fn($detail) => (($detail->quantite ?? 0) * ($detail->produit->prix_unitaire ?? 0) * ($detail->tva ?? 0)) / 100
+        );
     }
 
     public function total()
     {
-        return $this->montantHT() + $this->tva();
+        return round($this->montantHT() + $this->tva(), 2);
     }
 }

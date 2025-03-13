@@ -12,6 +12,8 @@
 <link href="{{ asset('assets/css/components/custom-sweetalert.css') }}" rel="stylesheet" type="text/css" />
 <!-- END THEME GLOBAL STYLES -->
 
+<link href="{{ asset('assets/css/components/custom-modal.css') }}" rel="stylesheet" type="text/css" />
+
 @include('head.head4')
 @include('head.head5')
 
@@ -27,7 +29,6 @@
     <!--  BEGIN CONTENT AREA  -->
     <div id="content" class="main-content">
         <div class="row layout-top-spacing">
-
             <div class="container">
 
                 <div class="row">
@@ -109,106 +110,47 @@
                                         });
                                     </script>
 
-                                    <div class="form-group row  mb-4">
-                                        <label for="produit_id" class="col-sm-2 col-form-label col-form-label-sm">Nom du
-                                            produit</label>
-                                        <div class="col-sm-10">
-                                            <select class="form-control" id="produit_id" name="produit_id">
-                                                <option value="">Choisir un produit</option>
-                                                @foreach ($produits as $produit)
-                                                    @foreach ($devis->detailDevis as $detail)
-                                                        <option value="{{ $produit->id }}"
-                                                            @if ($produit->id == $detail->produit_id) selected @endif>
-                                                            {{ $produit->nom }}</option>
-                                                    @endforeach
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row  mb-4" id="kt_field" style="display: none;">
-                                        <label for="categorie"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Catégorie</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control form-control-sm" id="categorie"
-                                                placeholder="Catégorie" name="categorie" required readonly>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row  mb-4" id="qte_field" style="display: none;">
-                                        <label for="quantite_stock"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Quantité</label>
-                                        <div class="col-sm-10">
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="quantite_stock" placeholder="Quantité" name="quantite_stock"
-                                                required readonly>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row  mb-4" id="pu_field" style="display: none;">
-                                        <label for="prix_unitaire"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Prix unitaire</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control form-control-sm"
-                                                id="prix_unitaire" placeholder="Prix unitaire" name="prix_unitaire"
-                                                required readonly>
-                                        </div>
+                                    <div id="produits">
+                                        @foreach ($devis->detailDevis as $detail)
+                                            <div
+                                                class="form-group
+                                                row  mb-4 produit-item">
+                                                <div class="col-md-4">
+                                                    <input type="hidden"
+                                                        name="produits[{{ $loop->index }}][produit_id]"
+                                                        value="{{ $detail->produit_id }}">
+                                                    <span>{{ $detail->Produit->nom }}</span>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text"
+                                                        name="produits[{{ $loop->index }}][quantite]"
+                                                        value="{{ $detail->quantite }}" class="form-control" readonly>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" name="produits[{{ $loop->index }}][tva]"
+                                                        value="{{ $detail->tva }}" class="form-control" readonly>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="button"
+                                                        class="btn btn-danger remove-produit">Supprimer</button>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
 
                                     <script>
                                         document.addEventListener('DOMContentLoaded', function() {
-                                            const produitSelect = document.getElementById('produit_id');
+                                            const produitsContainer = document.getElementById('produits');
 
-                                            const ktField = document.getElementById('kt_field');
-                                            const categorieInput = document.getElementById('categorie');
-
-                                            const qteField = document.getElementById('qte_field');
-                                            const qteInput = document.getElementById('quantite_stock');
-
-                                            const puField = document.getElementById('pu_field');
-                                            const puInput = document.getElementById('prix_unitaire');
-
-                                            // Fonction pour afficher/masquer les champs
-                                            function toggleEntrepriseField() {
-                                                const showFields = !!produitSelect.value;
-
-                                                ktField.style.display = showFields ? 'flex' : 'none';
-                                                categorieInput.required = showFields;
-
-                                                qteField.style.display = showFields ? 'flex' : 'none';
-                                                qteInput.required = showFields;
-
-                                                puField.style.display = showFields ? 'flex' : 'none';
-                                                puInput.required = showFields;
-                                            }
-
-                                            // Initialisation au chargement de la page
-                                            toggleEntrepriseField();
-
-                                            // Gestion du changement de sélection
-                                            produitSelect.addEventListener('change', toggleEntrepriseField);
+                                            // Ajouter un événement pour supprimer l'élément
+                                            produitsContainer.addEventListener('click', function(e) {
+                                                if (e.target.classList.contains('remove-produit')) {
+                                                    e.target.closest('.produit-item').remove();
+                                                }
+                                            });
                                         });
                                     </script>
 
-                                    <div class="form-group row  mb-4">
-                                        <label for="quantite"
-                                            class="col-sm-2 col-form-label col-form-label-sm">Qantité</label>
-                                        <div class="col-sm-10">
-                                            <input type="number" class="form-control form-control-sm" id="quantite"
-                                                placeholder="Qantité" name="quantite" required
-                                                @foreach ($devis->detailDevis as $detail) value="{{ old('quantite') ?? $detail->quantite }}" @endforeach>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row  mb-4">
-                                        <label for="tva"
-                                            class="col-sm-2 col-form-label col-form-label-sm">TVA</label>
-                                        <div class="col-sm-10">
-                                            <input type="number" class="form-control form-control-sm" id="tva"
-                                                placeholder="TVA" name="tva" required
-                                                @foreach ($devis->detailDevis as $detail) value="{{ old('tva') ?? $detail->tva }}" @endforeach>
-                                        </div>
-                                    </div>
 
                                     <div class="form-group row  mb-4">
                                         <label for="date_emission"
@@ -226,7 +168,8 @@
                                         <div class="col-sm-10">
                                             <input type="date" class="form-control form-control-sm"
                                                 id="date_echeance" placeholder="Date d'échéance" name="date_echeance"
-                                                required value="{{ old('date_echeance') ?? $devis->date_echeance }}">
+                                                required
+                                                value="{{ old('date_echeance') ?? $devis->date_echeance }}">
                                             <small id="date_error" class="text-danger" style="display: none;">
                                                 La date d'échéance ne peut pas être antérieure à la date d'émission.
                                             </small>
@@ -277,6 +220,11 @@
                                         </div>
                                     </div>
 
+                                    <!-- Bouton pour ajouter d'autres produits -->
+                                    <input type="button" id="addProduit" class="btn btn-secondary"
+                                        value="Ajouter un autre produit" data-toggle="modal"
+                                        data-target=".bd-example-modal-lg" />
+
                                     <input type="submit" name="time" required class="btn btn-primary"
                                         value="Modifier">
                                 </form>
@@ -286,18 +234,153 @@
                 </div>
 
             </div>
-
         </div>
+    </div>
 
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Ajouter un nouveau
+                        produit</h5>
+
+                </div>
+                <div class="modal-body">
+
+                    <form id="produitForm">
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="produit_id_modal">Nom du
+                                Produit</label>
+                            <div class="col-sm-10">
+                                <select id="produit_id_modal" class="form-control" required name="produit_id">
+                                    <option value="">Choisir un produit</option>
+                                    @foreach ($produits as $produit)
+                                        <option value="{{ $produit->id }}">
+                                            {{ $produit->nom }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm"
+                                for="quantite_modal">Quantité</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="quantite_modal" class="form-control" required
+                                    min="1" name="quantite">
+                                <small id="quantite-error" class="text-danger"></small>
+                            </div>
+                            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            <script>
+                                $(document).ready(function() {
+                                    $('#quantite_modal').on('input', function() {
+                                        var quantite = $(this).val();
+                                        var produitId = $('#produit_id_modal')
+                                            .val(); // Assure-toi que l'ID produit est bien récupéré
+                                        var submitBtn = $('button[type="submit"]');
+
+                                        if (produitId) {
+                                            $.ajax({
+                                                url: '/produit/stock/' + produitId,
+                                                type: 'GET',
+                                                success: function(data) {
+                                                    if (quantite > data.stock) {
+                                                        $('#quantite-error').text(
+                                                            'Stock insuffisant ! Il reste seulement ' + data.stock +
+                                                            ' unités.');
+                                                        submitBtn.prop('disabled', true); // Désactiver le bouton
+                                                    } else {
+                                                        $('#quantite-error').text(''); // Supprime le message d’erreur
+                                                        submitBtn.prop('disabled', false); // Réactiver le bouton
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                            </script>
+                        </div>
+
+                        <div class="form-group row  mb-4">
+                            <label class="col-sm-2 col-form-label col-form-label-sm" for="tva_modal">TVA (%)</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="tva_modal" class="form-control" required min="0"
+                                    step="0.01" name="tva">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Fermer</button>
+                    <button type="button" class="btn btn-primary" id="addProduitBtn">Ajouter</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-</div>
-<!--  END CONTENT AREA  -->
-</div>
-<!-- END MAIN CONTAINER -->
-
 
 @include('Footer.footer')
+
+<script>
+    let produitIndex = 0;
+
+    document.getElementById('addProduitBtn').addEventListener('click', function() {
+        const produitId = document.getElementById('produit_id_modal').value;
+        const quantite = document.getElementById('quantite_modal').value;
+        const tva = document.getElementById('tva_modal').value;
+
+        // Vérifier que toutes les informations sont remplies
+        if (produitId && quantite && tva) {
+            const produitsContainer = document.getElementById('produits');
+
+            // Récupération du nom du produit sélectionné
+            const produitNom = document.querySelector(`#produit_id_modal option[value="${produitId}"]`).text;
+
+            // Création de l'élément produit
+            const newProduitItem = document.createElement('div');
+            newProduitItem.classList.add('form-group', 'row', 'mb-4', 'produit-item');
+            newProduitItem.innerHTML = `
+                <div class="col-md-4">
+                    <input type="hidden" name="produits[${produitIndex}][produit_id]" value="${produitId}">
+                    <span>${produitNom}</span>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="produits[${produitIndex}][quantite]" value="${quantite}" class="form-control" readonly>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="produits[${produitIndex}][tva]" value="${tva}" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger remove-produit">Supprimer</button>
+                </div>
+            `;
+
+            // Ajouter le produit à la liste
+            produitsContainer.appendChild(newProduitItem);
+
+            // Ajouter un événement pour supprimer l'élément
+            newProduitItem.querySelector('.remove-produit').addEventListener('click', function() {
+                this.closest('.produit-item').remove();
+            });
+
+            // Réinitialiser les champs du modal
+            document.getElementById('produitForm').reset();
+
+            // Fermer le modal
+            $('#addProduitModal').modal('hide');
+
+            // Incrémenter l'index pour le prochain produit
+            produitIndex++;
+        } else {
+            alert('Veuillez remplir tous les champs.');
+        }
+    });
+</script>
+
+
+
+
 
 
 
@@ -354,43 +437,33 @@
         }
     });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     // Fonction pour récupérer et remplir les champs de formulaire
-    async function fetchData(url, mapping) {
+    async function fetchClientData(clientID) {
         try {
-            const response = await axios.get(url);
+            const response = await axios.get(`/api/client/${clientID}`);
             const data = response.data;
 
-            // Map des données vers les champs de formulaire
-            for (const [key, value] of Object.entries(mapping)) {
-                document.getElementById(key).value = data[value] ?? 'N/A';
-            }
+            // Remplissage des champs client
+            document.getElementById('type_client').value = data.type_client ?? 'N/A';
+            document.getElementById('entreprise').value = data.entreprise ?? 'N/A';
         } catch (error) {
-            console.error('Erreur lors de la récupération des données :', error);
-            alert('Impossible de récupérer les informations.');
+            console.error('Erreur lors de la récupération des données du client :', error);
+            alert('Impossible de récupérer les informations du client.');
         }
     }
 
-    // Précharger les données lors de la mise à jour du formulaire
+    // Précharger les données client si un ID est présent au chargement
     window.addEventListener('DOMContentLoaded', function() {
         const clientID = document.getElementById('client_id').value;
-        const produitID = document.getElementById('produit_id').value;
-
         if (clientID) {
-            fetchData(`/api/client/${clientID}`, {
-                'type_client': 'type_client',
-                'entreprise': 'entreprise'
-            });
-        }
-
-        if (produitID) {
-            fetchData(`/api/produit/detail/${produitID}`, {
-                'categorie': 'categorie',
-                'quantite_stock': 'quantite_stock',
-                'prix_unitaire': 'prix_unitaire'
-            });
+            fetchClientData(clientID);
         }
     });
 
@@ -398,26 +471,9 @@
     document.getElementById('client_id').addEventListener('change', function() {
         const clientID = this.value;
         if (clientID) {
-            fetchData(`/api/client/${clientID}`, {
-                'type_client': 'type_client',
-                'entreprise': 'entreprise'
-            });
+            fetchClientData(clientID);
         } else {
             resetClientFields();
-        }
-    });
-
-    // Événement pour sélectionner un produit
-    document.getElementById('produit_id').addEventListener('change', function() {
-        const produitID = this.value;
-        if (produitID) {
-            fetchData(`/api/produit/detail/${produitID}`, {
-                'categorie': 'categorie',
-                'quantite_stock': 'quantite_stock',
-                'prix_unitaire': 'prix_unitaire'
-            });
-        } else {
-            resetProductFields();
         }
     });
 
@@ -426,56 +482,9 @@
         document.getElementById('type_client').value = '';
         document.getElementById('entreprise').value = '';
     }
-
-    // Fonction pour réinitialiser les champs produit
-    function resetProductFields() {
-        document.getElementById('categorie').value = '';
-        document.getElementById('quantite_stock').value = '';
-        document.getElementById('prix_unitaire').value = '';
-    }
-
-    // Fonction pour mettre à jour les données via une API
-    async function updateData(url, payload) {
-        try {
-            const response = await axios.put(url, payload);
-            alert('Données mises à jour avec succès');
-        } catch (error) {
-            console.error('Erreur lors de la mise à jour des données :', error);
-            alert('La mise à jour a échoué.');
-        }
-    }
-
-    // Bouton de mise à jour du formulaire
-    document.getElementById('update-button').addEventListener('click', function() {
-        if (!validateForm()) return;
-
-        const payload = {
-            type_client: document.getElementById('type_client').value,
-            entreprise: document.getElementById('entreprise').value,
-            categorie: document.getElementById('categorie').value,
-            quantite_stock: document.getElementById('quantite_stock').value,
-            prix_unitaire: document.getElementById('prix_unitaire').value
-        };
-
-        updateData('/api/form/update', payload);
-    });
-
-    // Validation des champs du formulaire
-    function validateForm() {
-        const typeClient = document.getElementById('type_client').value;
-        const entreprise = document.getElementById('entreprise').value;
-
-        if (!typeClient) {
-            alert('Veuillez sélectionner un type de client.');
-            return false;
-        }
-        if (!entreprise) {
-            alert('Veuillez renseigner le nom de l\'entreprise.');
-            return false;
-        }
-        return true;
-    }
 </script>
+
+
 
 <!-- BEGIN THEME GLOBAL STYLE -->
 <script src="{{ asset('assets/js/scrollspyNav.js') }}"></script>

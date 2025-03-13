@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class DevisController extends Controller
 {
@@ -45,59 +46,120 @@ class DevisController extends Controller
      */
     public function store(Request $request)
     {
-        // Validation des données directement dans la requête
-        $request->validate([
-            'client_id' => 'required|integer',
-            'date_emission' => 'required|string|date',
-            'date_echeance' => 'required|string|date',
-            'status' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'client_id' => 'required|integer|exists:clients,id',
+            'date_emission' => 'required|date',
+            'date_echeance' => 'required|date|after_or_equal:date_emission',
+            'status' => 'required|string|in:en attente,payée,annulée',
+
+            // Option 1 : Enregistrement de plusieurs produits
+            'produits' => 'nullable|array',
+            'produits.*.produit_id' => 'required_with:produits|integer|exists:produits,id',
+            'produits.*.quantite' => 'required_with:produits|integer|min:1',
+            'produits.*.tva' => 'required_with:produits|numeric|min:0',
+
+            // Option 2 : Enregistrement d'un seul produit
+            'produit_id' => 'nullable|integer|exists:produits,id',
+            'quantite' => 'nullable|integer|min:1',
+            'tva' => 'nullable|numeric|min:0',
         ]);
 
-        $request->validate([
-            'produit_id' => 'required|integer',
-            'tva' => 'required|numeric',
-        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
 
         try {
-            // Démarrer la transaction
             DB::beginTransaction();
 
-            // Création du devis
-            $devis = new Devis();
-            $devis->client_id = $request->client_id;
-            $devis->reference_devis = Devis::generateReference();
-            $devis->date_emission = $request->date_emission;
-            $devis->date_echeance = $request->date_echeance;
-            $devis->status = $request->status;
-            $devis->save();
+            // Vérifier si c'est un devis complet ou juste un produit
+            if (!empty($validated['produits']) || isset($validated['produit_id'])) {
+                // Création du devis
+                $devis = Devis::create([
+                    'client_id' => $validated['client_id'],
+                    'reference_devis' => Devis::generateReference(),
+                    'date_emission' => $validated['date_emission'],
+                    'date_echeance' => $validated['date_echeance'],
+                    'status' => $validated['status']
+                ]);
 
-            Log::info('Devis créé avec succès', ['devis_id' => $devis->id, 'client_id' => $devis->client_id]);
+                Log::info('Devis créé avec succès', ['devis_id' => $devis->id]);
 
-            // Création du détail de devis
-            $detailDevis = new DetailsDevis();
-            $detailDevis->devis_id = $devis->id;
-            $detailDevis->produit_id = $request->produit_id;
-            $detailDevis->quantite = $request->quantite;
-            $detailDevis->tva = $request->tva;
-            $detailDevis->save();
+                // Si plusieurs produits sont fournis
+                if (!empty($validated['produits'])) {
+                    foreach ($validated['produits'] as $produitData) {
+                        $this->ajouterProduitADevis($devis, $produitData);
+                    }
+                }
 
-            Log::info('Détail de devis ajouté avec succès', ['devis_id' => $devis->id, 'produit_id' => $detailDevis->produit_id]);
+                // Si un seul produit est fourni
+                if (isset($validated['produit_id'])) {
+                    $this->ajouterProduitADevis($devis, [
+                        'produit_id' => $validated['produit_id'],
+                        'quantite' => $validated['quantite'],
+                        'tva' => $validated['tva']
+                    ]);
+                }
 
-            // Validation de la transaction
-            DB::commit();
+                // Mise à jour du total du devis
+                $devis->total();
 
-            return response()->json(['success' => true, 'message' => 'Devis ajouté avec succès'], 201);
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Devis ajoutés avec succès',
+                    'devis' => $devis->load('detailDevis'),
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous devez fournir au moins un produit ou plusieurs produits'
+                ], 400);
+            }
         } catch (Exception $e) {
-            // Annuler la transaction en cas d'erreur
             DB::rollBack();
 
-            Log::error('Erreur lors de la création du devis', [
+            Log::error('Erreur lors de l\'ajout du devis/produit', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
             ]);
 
-            return response()->json(['success' => false, 'message' => 'Une erreur est survenue lors de l\'ajout du devis'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'ajout : ' . $e->getMessage()
+            ], 500);
         }
+    }
+
+    /**
+     * Fonction pour ajouter un produit à une devis
+     */
+    private function ajouterProduitADevis($devis, $produitData)
+    {
+        $produit = Produits::where('id', $produitData['produit_id'])
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        if ($produit->quantite_stock < $produitData['quantite']) {
+            throw new Exception("Stock insuffisant pour le produit : {$produit->nom}");
+        }
+
+        DetailsDevis::create([
+            'devis_id' => $devis->id,
+            'produit_id' => $produitData['produit_id'],
+            'quantite' => $produitData['quantite'],
+            'tva' => $produitData['tva'],
+        ]);
+
+        // Mise à jour du stock
+        $produit->decrement('quantite_stock', $produitData['quantite']);
     }
 
 
@@ -136,57 +198,102 @@ class DevisController extends Controller
      */
     public function update(Request $request, $devis)
     {
-        // Validation des données directement dans la requête
-        $request->validate([
-            'client_id' => 'required|integer',
-            'date_emission' => 'required|string|date',
-            'date_echeance' => 'required|string|date',
-            'status' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'client_id' => 'required|integer|exists:clients,id',
+            'date_emission' => 'required|date',
+            'date_echeance' => 'required|date|after_or_equal:date_emission',
+            'status' => 'required|string|in:en attente,payée,annulée',
+
+            // Option 1 : Enregistrement de plusieurs produits
+            'produits' => 'nullable|array',
+            'produits.*.produit_id' => 'required_with:produits|integer|exists:produits,id',
+            'produits.*.quantite' => 'required_with:produits|integer|min:1',
+            'produits.*.tva' => 'required_with:produits|numeric|min:0',
+
+            // Option 2 : Enregistrement d'un seul produit
+            'produit_id' => 'nullable|integer|exists:produits,id',
+            'quantite' => 'nullable|integer|min:1',
+            'tva' => 'nullable|numeric|min:0',
         ]);
 
-        $request->validate([
-            'produit_id' => 'required|integer',
-            'tva' => 'required|numeric',
-        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
 
         try {
-            DB::beginTransaction(); // Démarrer la transaction
+            DB::beginTransaction();
 
-            // Trouver le devis à mettre à jour
-            $devi = Devis::findOrFail($devis);
-            $devi->client_id = $request->client_id;
-            $devi->date_emission = $request->date_emission;
-            $devi->date_echeance = $request->date_echeance;
-            $devi->status = $request->status;
-            $devi->save();
+            // Vérifier si c'est un devis complet ou juste un produit
+            if (!empty($validated['produits']) || isset($validated['produit_id'])) {
+                // Trouver le devis
+                $devis = Devis::findOrFail($devis);
 
-            Log::info('Devis mis à jour', ['devis_id' => $devi->id, 'client_id' => $devi->client_id]);
+                // Mise à jour du devis
+                $devis->update([
+                    'client_id' => $validated['client_id'],
+                    'date_emission' => $validated['date_emission'],
+                    'date_echeance' => $validated['date_echeance'],
+                    'status' => $validated['status']
+                ]);
 
-            // Trouver le détail du devis
-            $detail = DetailsDevis::where('devis_id', $devi->id)->firstOrFail();
-            $detail->produit_id = $request->produit_id;
-            $detail->quantite = $request->quantite;
-            $detail->tva = $request->tva;
-            $detail->save();
+                Log::info('Devis mis à jour avec succès', ['devis_id' => $devis->id]);
 
-            Log::info('Détail de devis mis à jour', ['devis_id' => $devi->id, 'produit_id' => $detail->produit_id]);
+                // Supprimer les anciens produits
+                $devis->detailDevis()->delete();
 
-            DB::commit(); // Validation de la transaction
+                // Si plusieurs produits sont fournis
+                if (!empty($validated['produits'])) {
+                    foreach (
+                        $validated['produits'] as $produitData
+                    ) {
+                        $this->ajouterProduitADevis($devis, $produitData);
+                    }
 
-            return response()->json(['success' => true, 'message' => 'Devis mis à jour avec succès'], 200);
+                    // Mise à jour du total du devis
+                    $devis->total();
+
+                    DB::commit();
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Devis mis à jour avec succès',
+                        'devis' => $devis->load('detailDevis'),
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Vous devez fournir au moins un produit ou plusieurs produits'
+                    ], 400);
+                }
+            }
         } catch (ModelNotFoundException $e) {
-            DB::rollBack(); // Annuler la transaction
-            Log::warning('Devis ou Détail non trouvé', ['devis_id' => $devis, 'error' => $e->getMessage()]);
+            DB::rollBack();
 
-            return response()->json(['success' => false, 'message' => 'Devis ou Détail de devis introuvable'], 404);
+            Log::warning('Devis introuvable', ['devis_id' => $devis, 'error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Devis introuvable'
+            ], 404);
         } catch (Exception $e) {
-            DB::rollBack(); // Annuler la transaction
-            Log::error('Erreur lors de la mise à jour du devis', [
+            DB::rollBack();
+
+            Log::error('Erreur lors de la mise à jour du devis/produit', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
             ]);
 
-            return response()->json(['success' => false, 'message' => 'Une erreur est survenue lors de la mise à jour du devis'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la mise à jour : ' . $e->getMessage()
+            ], 500);
         }
     }
 
